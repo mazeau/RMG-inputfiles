@@ -1,0 +1,3159 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>RMG Output</title>
+<style type="text/css">
+    body {
+        font-family: sans-serif;
+    }
+    a {
+        color: #993333;
+        text-decoration: none;
+    }
+    a:visited {
+        color: #993333;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+
+    
+    table.speciesList, table.reactionList {
+        border-collapse: collapse;
+        align: center;
+    }
+
+        
+    table.speciesList th, table.reactionList th {
+        text-align: left;
+        vertical-align: top;
+    }
+    table.reaction {
+        border-top: 1px solid #808080;        
+        padding: 10px;
+    }
+    td.reactants {
+        text-align: right;
+    }
+    td.products {
+        text-align: left;
+    }
+    td.reactionArrow {
+        text-align: center;
+        font-size: 16px;
+    }
+    td.species img, td.reactants img, td.products img {
+        vertical-align: middle;
+    }
+    
+    img.surface_species {
+        vertical-align: bottom;
+    }
+    
+    tr.species{
+        border-top: 1px solid #808080;        
+    }
+
+    tr.rxnStart{
+        border-top: 1px solid #808080;        
+    }
+    
+    td, .speciesList th{
+        padding: 10px;
+        }
+    
+    td.index {
+    width: 50px;
+    }
+    
+    .thermo td, .thermo th{
+    padding: 2px;
+    }
+    
+    .kinetics td,  .kinetics th {
+    padding: 2px;
+    }
+    
+    tr.kinetics {
+        font-size: small;
+    }
+    .KineticsData {
+        # border: 1px solid gray;
+    }
+    .KineticsData th {
+        width: 15em;
+        word-wrap: none;
+    }
+    .KineticsData td {
+        width: 3em;
+    }
+    
+    .chemkin, .KineticsData_repr {
+       white-space: pre-wrap;
+       font-size: x-small;
+       font-family: "Andale Mono", monospace;
+    }
+    
+    .energy {
+        font-size: small;
+    }
+    
+    .thermoComment {
+       white-space: pre-wrap;
+       font-size: small;
+       font-family: "Andale Mono", monospace;
+    }
+    .hide_kinetics .kinetics{
+       display: none !important;
+    }
+    .hide_chemkin .chemkin{
+       display: none !important;
+    }
+    .hide_reaction{
+       display: none !important;
+    }
+    .hide_energy .energy{
+       display: none !important;
+    }
+    .hide_thermoComment .thermoComment{
+       display: none !important;
+    }
+
+           
+</style>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
+<script type="text/javascript" src="../../../external/jquery.min.js"></script>
+<script type="text/javascript">
+function updateFamily(family) {
+    if (family.checked) {
+        $("."+family.value).show();
+    } else {
+        $("."+family.value).hide();
+    }
+}
+function updateDetails(type) {
+    if (type.checked) {
+        $("."+type.value).show();
+    } else {
+        $("."+type.value).hide();
+    }
+}
+function checkAllFamilies() {
+    $("#familySelector").find("[name='family']").each(function() { this.checked = true; updateFamily(this); });
+    return false;
+}
+function uncheckAllFamilies() {
+    $("#familySelector").find("[name='family']").each(function() { this.checked = false; updateFamily(this); });
+    return false;
+}
+function checkAllDetails() {
+    $("#familySelector").find("[name='detail']").each(function() { this.checked = true; updateDetails(this); });
+    return false;
+}
+function uncheckAllDetails() {
+    $("#familySelector").find("[name='detail']").each(function() { this.checked = false; updateDetails(this); });
+    return false;
+}
+
+function updateFamilyDetails() {
+    $("#familySelector").find("[name='family']").each(function() { 
+        updateDetails(this); });
+    return false;
+}
+function updateReactionDetails() {
+    $("#familySelector").find("[name='detail']").each(function() { 
+        updateDetails(this); });
+    return false;
+}
+
+function updateThermoDetails(type) {
+    if (type.checked) {
+        $(".thermoComment").removeClass("hide_"+type.value);
+    } else {
+        $(".thermoComment").addClass("hide_"+type.value);
+    }
+}
+
+function uncheckThermoDetails() {
+    $("#thermoSelector").find("[name='detail']").each(function() { this.checked = false; updateThermoDetails(this); });
+    return false;
+}
+
+function resetReactionFilter() {
+    $.each($(".reaction"), function() {
+        $(this).removeClass("hide_reaction");
+    });
+}
+
+function submitReactionFilter(){
+    resetReactionFilter();
+    _r1 = $("#reactant1").val().toLowerCase();
+    _r2 = $("#reactant2").val().toLowerCase();
+    _p1 = $("#product1").val().toLowerCase();
+    _p2 = $("#product2").val().toLowerCase();
+    $.each($(".reaction"), function() {
+        _rxnRow = this;
+        _matched = false;
+        _rxn_spc_list = [""];
+        _reactants = _rxnRow.getElementsByClassName('reactants');
+        $.each($(_reactants).find("a"), function() {
+            _a = this;
+            $.each($(_a).find("img"), function() {
+                _spec = this;
+                _rxn_spc_list.push(_spec.getAttribute("alt").toLowerCase());
+          
+            });
+        });
+        _products = _rxnRow.getElementsByClassName('products');
+        $.each($(_products).find("a"), function() {
+            _a = this;
+            $.each($(_a).find("img"), function() {
+                _spec = this;
+                _rxn_spc_list.push(_spec.getAttribute("alt").toLowerCase());
+            
+            });
+        });
+
+        if(_rxn_spc_list.indexOf(_r1) != -1 && _rxn_spc_list.indexOf(_r2) != -1 &&_rxn_spc_list.indexOf(_p1) != -1 && _rxn_spc_list.indexOf(_p2) != -1){
+            _matched = true
+        }
+        if(_matched == true)
+        $(_rxnRow).removeClass("hide_reaction");
+        else
+        $(_rxnRow).addClass("hide_reaction");
+
+     });
+}
+
+$(document).ready(function() {
+    uncheckThermoDetails();
+    checkAllFamilies();
+    uncheckAllDetails();
+});
+</script>
+</head>
+
+<body>
+
+<h1>RMG Output</h1>
+
+<h2>Species (30)</h2>
+
+<form id='thermoSelector' action="">
+<input type="checkbox" id="thermoComment" name="detail" value="thermoComment" onclick="updateThermoDetails(this);" checked="false"><label for="thermoComment"><b>Show Thermo Details</b></label><br>
+</form>
+
+
+<table class="speciesList" hide_thermoComment>
+<tr><th>Index</th><th>Thermo<br> H298 (kcal/mol), S298 (cal/mol*K), Cp (cal/mol*K)</th><th>Structure</th><th>Label</th><th>SMILES</th><th>MW<br> (g/mol)</th></tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    -1.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                45.79
+                </td>
+                <td>6.96</td>
+                <td>7.07</td>
+                <td>7.81</td>
+                <td>8.31</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20N%20u0%20p1%20c0%20%7B2%2CT%7D%0A2%20N%20u0%20p1%20c0%20%7B1%2CT%7D%0A><img src="species/N2.png" alt="N2" title="N2"></a></td>
+    <td class="label" valign="top">N2</td>
+    <td class="SMILES" valign="top">N#N</td>
+    
+  <td class="MW" valign="top">28.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    -1.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                37.01
+                </td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20Ar%20u0%20p4%20c0%0A><img src="species/Ar.png" alt="Ar" title="Ar"></a></td>
+    <td class="label" valign="top">Ar</td>
+    <td class="SMILES" valign="top">[Ar]</td>
+    
+  <td class="MW" valign="top">39.35</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    -1.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                30.15
+                </td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20He%20u0%20p1%20c0%0A><img src="species/He.png" alt="He" title="He"></a></td>
+    <td class="label" valign="top">He</td>
+    <td class="SMILES" valign="top">[He]</td>
+    
+  <td class="MW" valign="top">4.00</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    -1.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                34.97
+                </td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20Ne%20u0%20p4%20c0%0A><img src="species/Ne.png" alt="Ne" title="Ne"></a></td>
+    <td class="label" valign="top">Ne</td>
+    <td class="SMILES" valign="top">[Ne]</td>
+    
+  <td class="MW" valign="top">20.18</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    1.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                0.00
+                </td>
+                <td>0.00</td>
+                <td>-0.00</td>
+                <td>-0.00</td>
+                <td>-0.00</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A><img src="species/X(1).png" alt="X(1)" title="X(1)"></a></td>
+    <td class="label" valign="top">X(1)</td>
+    <td class="SMILES" valign="top">[Pt]</td>
+    
+  <td class="MW" valign="top">0.00</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    2.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -17.81
+                 </td>
+                <td>
+                44.47
+                </td>
+                <td>8.60</td>
+                <td>10.94</td>
+                <td>17.01</td>
+                <td>20.50</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/CH4(2).png" alt="CH4(2)" title="CH4(2)"></a></td>
+    <td class="label" valign="top">CH4(2)</td>
+    <td class="SMILES" valign="top">C</td>
+    
+  <td class="MW" valign="top">16.04</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    3.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                49.02
+                </td>
+                <td>7.02</td>
+                <td>7.43</td>
+                <td>8.35</td>
+                <td>8.73</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/multiplicity%203%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A><img src="species/O2(3).png" alt="O2(3)" title="O2(3)"></a></td>
+    <td class="label" valign="top">O2(3)</td>
+    <td class="SMILES" valign="top">[O][O]</td>
+    
+  <td class="MW" valign="top">32.00</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    6.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -33.58
+                 </td>
+                <td>
+                3.33
+                </td>
+                <td>4.63</td>
+                <td>5.47</td>
+                <td>5.86</td>
+                <td>5.88</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A><img src="species/OX(6).png" alt="OX(6)" title="OX(6)"></a></td>
+    <td class="label" valign="top">OX(6)</td>
+    <td class="SMILES" valign="top">O=[Pt]</td>
+    
+  <td class="MW" valign="top">16.00</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    18.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -20.13
+                 </td>
+                <td>
+                37.56
+                </td>
+                <td>10.30</td>
+                <td>13.08</td>
+                <td>19.26</td>
+                <td>22.41</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A6%20X%20u0%20p0%20c0%0A><img src="species/C.[Pt](18).png" alt="CH4X(18)" title="CH4X(18)"></a></td>
+    <td class="label" valign="top">CH4X(18)</td>
+    <td class="SMILES" valign="top">C.[Pt]</td>
+    
+  <td class="MW" valign="top">16.04</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    7.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -10.95
+                 </td>
+                <td>
+                13.80
+                </td>
+                <td>8.86</td>
+                <td>12.31</td>
+                <td>17.33</td>
+                <td>19.88</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/CH3X(7).png" alt="CH3X(7)" title="CH3X(7)"></a></td>
+    <td class="label" valign="top">CH3X(7)</td>
+    <td class="SMILES" valign="top">C[Pt]</td>
+    
+  <td class="MW" valign="top">15.03</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    8.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -37.25
+                 </td>
+                <td>
+                8.78
+                </td>
+                <td>7.99</td>
+                <td>9.23</td>
+                <td>10.10</td>
+                <td>10.56</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8)"></a></td>
+    <td class="label" valign="top">HOX(8)</td>
+    <td class="SMILES" valign="top">O[Pt]</td>
+    
+  <td class="MW" valign="top">17.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    5.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -6.44
+                 </td>
+                <td>
+                1.03
+                </td>
+                <td>2.53</td>
+                <td>4.16</td>
+                <td>5.34</td>
+                <td>5.72</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/HX(5).png" alt="HX(5)" title="HX(5)"></a></td>
+    <td class="label" valign="top">HX(5)</td>
+    <td class="SMILES" valign="top">[Pt]</td>
+    
+  <td class="MW" valign="top">1.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    16.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                0.16
+                 </td>
+                <td>
+                4.74
+                </td>
+                <td>6.82</td>
+                <td>10.01</td>
+                <td>13.57</td>
+                <td>15.32</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16)"></a></td>
+    <td class="label" valign="top">CH2X(16)</td>
+    <td class="SMILES" valign="top">C=[Pt]</td>
+    
+  <td class="MW" valign="top">14.03</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    17.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -6.07
+                 </td>
+                <td>
+                2.39
+                </td>
+                <td>5.11</td>
+                <td>7.53</td>
+                <td>9.73</td>
+                <td>10.61</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17)"></a></td>
+    <td class="label" valign="top">CHX(17)</td>
+    <td class="SMILES" valign="top">C#[Pt]</td>
+    
+  <td class="MW" valign="top">13.02</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    15.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                12.82
+                 </td>
+                <td>
+                1.61
+                </td>
+                <td>3.37</td>
+                <td>4.75</td>
+                <td>5.61</td>
+                <td>5.80</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A><img src="species/CX(15).png" alt="CX(15)" title="CX(15)"></a></td>
+    <td class="label" valign="top">CX(15)</td>
+    <td class="SMILES" valign="top">C~[Pt]</td>
+    
+  <td class="MW" valign="top">12.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    14.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -67.26
+                 </td>
+                <td>
+                9.22
+                </td>
+                <td>8.67</td>
+                <td>9.89</td>
+                <td>11.18</td>
+                <td>11.38</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14)"></a></td>
+    <td class="label" valign="top">OCX(14)</td>
+    <td class="SMILES" valign="top">O=C=[Pt]</td>
+    
+  <td class="MW" valign="top">28.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    13.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -26.31
+                 </td>
+                <td>
+                47.20
+                </td>
+                <td>6.95</td>
+                <td>7.13</td>
+                <td>7.86</td>
+                <td>8.35</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: thermo_DFT_CCSDTF12_BAC</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p1%20c%2B1%20%7B2%2CT%7D%0A2%20C%20u0%20p1%20c-1%20%7B1%2CT%7D%0A><img src="species/CO(13).png" alt="CO(13)" title="CO(13)"></a></td>
+    <td class="label" valign="top">CO(13)</td>
+    <td class="SMILES" valign="top">[C-]#[O+]</td>
+    
+  <td class="MW" valign="top">28.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    9.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -62.97
+                 </td>
+                <td>
+                22.61
+                </td>
+                <td>8.61</td>
+                <td>9.94</td>
+                <td>11.80</td>
+                <td>12.96</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%0A><img src="species/H2OX(9).png" alt="H2OX(9)" title="H2OX(9)"></a></td>
+    <td class="label" valign="top">H2OX(9)</td>
+    <td class="SMILES" valign="top">O.[Pt]</td>
+    
+  <td class="MW" valign="top">18.02</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    10.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -57.80
+                 </td>
+                <td>
+                45.08
+                </td>
+                <td>8.04</td>
+                <td>8.39</td>
+                <td>9.77</td>
+                <td>11.02</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/H2O(10).png" alt="H2O(10)" title="H2O(10)"></a></td>
+    <td class="label" valign="top">H2O(10)</td>
+    <td class="SMILES" valign="top">O</td>
+    
+  <td class="MW" valign="top">18.02</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    12.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -87.45
+                 </td>
+                <td>
+                28.54
+                </td>
+                <td>10.13</td>
+                <td>12.60</td>
+                <td>15.33</td>
+                <td>16.44</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Gas phase thermo from Thermo library: thermo_DFT_CCSDTF12_BAC. Adsorption<br>correction: + Thermo group additivity estimation: adsorptionPt(R*vdW) Binding<br>energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B2%2CD%7D%0A4%20X%20u0%20p0%20c0%0A><img src="species/CO2X(12).png" alt="CO2X(12)" title="CO2X(12)"></a></td>
+    <td class="label" valign="top">CO2X(12)</td>
+    <td class="SMILES" valign="top">O=C=O.[Pt]</td>
+    
+  <td class="MW" valign="top">44.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    11.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -93.92
+                 </td>
+                <td>
+                51.07
+                </td>
+                <td>8.89</td>
+                <td>10.61</td>
+                <td>12.88</td>
+                <td>13.82</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: thermo_DFT_CCSDTF12_BAC</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B2%2CD%7D%0A><img src="species/CO2(11).png" alt="CO2(11)" title="CO2(11)"></a></td>
+    <td class="label" valign="top">CO2(11)</td>
+    <td class="SMILES" valign="top">O=C=O</td>
+    
+  <td class="MW" valign="top">44.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    51.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -19.84
+                 </td>
+                <td>
+                24.67
+                </td>
+                <td>8.20</td>
+                <td>9.11</td>
+                <td>10.33</td>
+                <td>10.97</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Gas phase thermo from Thermo library: thermo_DFT_CCSDTF12_BAC. Adsorption<br>correction: + Thermo group additivity estimation: adsorptionPt(R*vdW) Binding<br>energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p1%20c%2B1%20%7B2%2CT%7D%0A2%20C%20u0%20p1%20c-1%20%7B1%2CT%7D%0A3%20X%20u0%20p0%20c0%0A><img src="species/COX(51).png" alt="COX(51)" title="COX(51)"></a></td>
+    <td class="label" valign="top">COX(51)</td>
+    <td class="SMILES" valign="top">[C-]#[O+].[Pt]</td>
+    
+  <td class="MW" valign="top">28.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    4.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -0.00
+                 </td>
+                <td>
+                31.23
+                </td>
+                <td>6.92</td>
+                <td>6.97</td>
+                <td>7.22</td>
+                <td>7.72</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/H2(4).png" alt="H2(4)" title="H2(4)"></a></td>
+    <td class="label" valign="top">H2(4)</td>
+    <td class="SMILES" valign="top">[H][H]</td>
+    
+  <td class="MW" valign="top">2.02</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    23.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                8.86
+                 </td>
+                <td>
+                43.96
+                </td>
+                <td>6.95</td>
+                <td>6.95</td>
+                <td>7.24</td>
+                <td>7.72</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/OH(D)(23).png" alt="OH(D)(23)" title="OH(D)(23)"></a></td>
+    <td class="label" valign="top">OH(D)(23)</td>
+    <td class="SMILES" valign="top">[OH]</td>
+    
+  <td class="MW" valign="top">17.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    46.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -85.44
+                 </td>
+                <td>
+                27.52
+                </td>
+                <td>10.84</td>
+                <td>15.30</td>
+                <td>19.99</td>
+                <td>21.72</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Gas phase thermo from Thermo library: thermo_DFT_CCSDTF12_BAC. Adsorption<br>correction: + Thermo group additivity estimation: adsorptionPt(C-*R3) Binding<br>energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B3%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CS%7D%20%7B2%2CD%7D%20%7B5%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B3%2CS%7D%0A><img src="species/HOCOX(46).png" alt="HOCOX(46)" title="HOCOX(46)"></a></td>
+    <td class="label" valign="top">HOCOX(46)</td>
+    <td class="SMILES" valign="top">O=C(O)[Pt]</td>
+    
+  <td class="MW" valign="top">45.02</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    52.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -1.40
+                 </td>
+                <td>
+                23.39
+                </td>
+                <td>7.75</td>
+                <td>8.02</td>
+                <td>8.30</td>
+                <td>8.41</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%0A><img src="species/[H][H].[Pt](52).png" alt="H2X(52)" title="H2X(52)"></a></td>
+    <td class="label" valign="top">H2X(52)</td>
+    <td class="SMILES" valign="top">[H][H].[Pt]</td>
+    
+  <td class="MW" valign="top">2.02</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    24.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -29.87
+                 </td>
+                <td>
+                18.43
+                </td>
+                <td>12.37</td>
+                <td>14.17</td>
+                <td>15.80</td>
+                <td>16.31</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B1%2CS%7D%20%7B3%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/OO[Pt](24).png" alt="HO2X(24)" title="HO2X(24)"></a></td>
+    <td class="label" valign="top">HO2X(24)</td>
+    <td class="SMILES" valign="top">OO[Pt]</td>
+    
+  <td class="MW" valign="top">33.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    44.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                -53.63
+                 </td>
+                <td>
+                16.80
+                </td>
+                <td>9.55</td>
+                <td>11.98</td>
+                <td>15.04</td>
+                <td>16.16</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: surfaceThermoPt Binding energy corrected by LSR.</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A><img src="species/O=C[Pt](44).png" alt="CHOX(44)" title="CHOX(44)"></a></td>
+    <td class="label" valign="top">CHOX(44)</td>
+    <td class="SMILES" valign="top">O=C[Pt]</td>
+    
+  <td class="MW" valign="top">29.02</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    63.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                2.85
+                 </td>
+                <td>
+                54.68
+                </td>
+                <td>8.38</td>
+                <td>9.36</td>
+                <td>11.30</td>
+                <td>12.27</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: thermo_DFT_CCSDTF12_BAC</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A><img src="species/HO2(63).png" alt="HO2(63)" title="HO2(63)"></a></td>
+    <td class="label" valign="top">HO2(63)</td>
+    <td class="SMILES" valign="top">[O]O</td>
+    
+  <td class="MW" valign="top">33.01</td>
+    
+</tr>
+
+
+<tr class="species">
+    <td class="index" valign="top">
+    27.</td>
+    
+    
+ <td class="thermo" valign="top">
+ 
+
+        <table class="thermo" align="left">
+            <tr>
+                <th>H298</th>
+                <th>S298</th>
+                <th>Cp300</th>
+                <th>Cp500</th>
+                <th>Cp1000</th>
+                <th>Cp1500</th>
+            </tr>
+            <tr>
+                <td>
+                                    
+                52.10
+                 </td>
+                <td>
+                27.42
+                </td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+                <td>4.97</td>
+            </tr>
+<tr><td colspan="6" class="thermoComment">
+<div id="thermoComment" class="thermoComment">Thermo library: primaryThermoLibrary</div>
+</td></tr>
+        </table>
+    
+  
+
+ </td>
+    
+    <td class="structure" valign="top"><a href=http://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20H%20u1%20p0%20c0%0A><img src="species/H(27).png" alt="H(27)" title="H(27)"></a></td>
+    <td class="label" valign="top">H(27)</td>
+    <td class="SMILES" valign="top">[H]</td>
+    
+  <td class="MW" valign="top">1.01</td>
+    
+</tr>
+
+</table>
+
+<h2>Reactions (39)</h2>
+
+<form id='familySelector' action="">
+<h4>Reaction families:</h4>
+    <input type="checkbox" id="Surface_CPOX_Pt_Deutschmann2006" name="family" value="Surface_CPOX_Pt_Deutschmann2006" checked="checked" onclick="updateFamily(this);"><label for="Surface_CPOX_Pt_Deutschmann2006">Surface/CPOX_Pt/Deutschmann2006 (18 rxns)</label><br>
+    <input type="checkbox" id="Surface_Abstraction" name="family" value="Surface_Abstraction" checked="checked" onclick="updateFamily(this);"><label for="Surface_Abstraction">Surface_Abstraction (11 rxns)</label><br>
+    <input type="checkbox" id="Surface_Adsorption_Dissociative" name="family" value="Surface_Adsorption_Dissociative" checked="checked" onclick="updateFamily(this);"><label for="Surface_Adsorption_Dissociative">Surface_Adsorption_Dissociative (1 rxn)</label><br>
+    <input type="checkbox" id="Surface_Adsorption_Single" name="family" value="Surface_Adsorption_Single" checked="checked" onclick="updateFamily(this);"><label for="Surface_Adsorption_Single">Surface_Adsorption_Single (3 rxns)</label><br>
+    <input type="checkbox" id="Surface_Adsorption_vdW" name="family" value="Surface_Adsorption_vdW" checked="checked" onclick="updateFamily(this);"><label for="Surface_Adsorption_vdW">Surface_Adsorption_vdW (3 rxns)</label><br>
+    <input type="checkbox" id="Surface_Dissociation" name="family" value="Surface_Dissociation" checked="checked" onclick="updateFamily(this);"><label for="Surface_Dissociation">Surface_Dissociation (3 rxns)</label><br>
+
+<a href="javascript:checkAllFamilies();" onclick="checkAllFamilies()">check all</a> &nbsp; &nbsp; <a href="javascript:uncheckAllFamilies();" onclick="uncheckAllFamilies();">uncheck all</a><br>
+
+<h4>Reaction Details:</h4>
+<input type="checkbox" id="kinetics" name="detail" value="kinetics" onclick="updateDetails(this);"><label for="kinetics">Kinetics</label><br>
+<input type="checkbox" id="energy" name="detail" value="energy" onclick="updateDetails(this);"><label for="energy">Heats of Reaction</label><br>
+<input type="checkbox" id="chemkin" name="detail" value="chemkin" onclick="updateDetails(this);"><label for="chemkin">Chemkin strings</label><br>
+<a href="javascript:checkAllDetails();" onclick="checkAllDetails()">check all</a> &nbsp; &nbsp; <a href="javascript:uncheckAllDetails();" onclick="uncheckAllDetails();">uncheck all</a>
+</form>
+
+<h4>Reaction Filter:</h4>
+
+<form id="reactionFilter">
+  Reactant 1: <input type="text" id="reactant1" value=""> &nbsp;
+  Reactant 2: <input type="text" id="reactant2" value=""> &nbsp;
+  Product 1: <input type="text" id="product1" value=""> &nbsp;
+  Product 2: <input type="text" id="product2" value=""><br><br>
+
+  
+</form>
+
+<input type="button" onclick="submitReactionFilter()" value="Search"> &nbsp;
+<input type="button" onclick="resetReactionFilter()" value="Clear Filter"> 
+
+<h4>Reaction List:</h4>
+
+<table class="reactionList">
+<thead>
+<tr><th>Index</th><th colspan="3" style="text-align: center;">Reaction</th><th>Family</th></tr>
+</thead>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3Dmultiplicity%203%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__reactant3%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A" title="Search on RMG website" class="searchlink">2.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/multiplicity%203%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A"><img src="species/O2(3).png" alt="O2(3)" title="O2(3), MW = 32.00 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+9.9</td><td>+9.8</td><td>+9.7</td><td>+9.6</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1.89e+21,'cm^5/(mol^2*s)'), n=-0.5, Ea=(0,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -67.15
+    <br><b>S298 (cal/mol*K)</b> = -42.36
+    <br><b>G298 (kcal/mol)</b> = -54.53</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: O2(3), OX(6); X(1), OX(6); X(1), OX(6); 
+O2(3)+X(1)+X(1)=OX(6)+OX(6)                         1.890000e+21 -0.500    0.000    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Adsorption_vdW rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A6%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">19.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH4(2).png" alt="CH4(2)" title="CH4(2), MW = 16.04 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A6%20X%20u0%20p0%20c0%0A"><img src="species/C.[Pt](18).png" alt="CH4X(18)" title="CH4X(18), MW = 16.04 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Adsorption_vdW</td>
+</tr>
+<tr class="kinetics Surface_Adsorption_vdW hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.1, n=0, Ea=(0,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Adsorbate;VacantSite]
+Euclidian distance = 0
+family: Surface_Adsorption_vdW""")</span></td>
+</tr>
+<tr class="energy Surface_Adsorption_vdW hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -2.31
+    <br><b>S298 (cal/mol*K)</b> = -6.91
+    <br><b>G298 (kcal/mol)</b> = -0.25</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Adsorption_vdW hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Adsorption_vdW
+! Flux pairs: X(1), CH4X(18); CH4(2), CH4X(18); 
+! Exact match found for rate rule [Adsorbate;VacantSite]
+! Euclidian distance = 0
+! family: Surface_Adsorption_vdW
+CH4(2)+X(1)=CH4X(18)                                1.000e-01 0.000     0.000    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant3%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">4.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH4(2).png" alt="CH4(2)" title="CH4(2), MW = 16.04 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH3X(7).png" alt="CH3X(7)" title="CH3X(7), MW = 15.03 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+6.2</td><td>+8.6</td><td>+9.5</td><td>+9.9</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(5e+18,'cm^5/(mol^2*s)'), n=0.7, Ea=(42000,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 3.20
+    <br><b>S298 (cal/mol*K)</b> = -25.23
+    <br><b>G298 (kcal/mol)</b> = 10.71</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: CH4(2), CH3X(7); X(1), HOX(8); OX(6), HOX(8); 
+OX(6)+CH4(2)+X(1)=CH3X(7)+HOX(8)                    5.000000e+18 0.700     10.038   
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__reactant3%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">3.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH4(2).png" alt="CH4(2)" title="CH4(2), MW = 16.04 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH3X(7).png" alt="CH3X(7)" title="CH3X(7), MW = 15.03 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.0009, n=0, Ea=(72000,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 0.43
+    <br><b>S298 (cal/mol*K)</b> = -29.64
+    <br><b>G298 (kcal/mol)</b> = 9.26</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: CH4(2), CH3X(7); X(1), HX(5); X(1), HX(5); 
+CH4(2)+X(1)+X(1)=HX(5)+CH3X(7)                      9.000e-04 0.000     17.208   
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">15.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+15.9</td><td>+16.5</td><td>+16.7</td><td>+16.8</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1.28e+21,'cm^2/(mol*s)'), n=0, Ea=(11200,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 2.77
+    <br><b>S298 (cal/mol*K)</b> = 4.42
+    <br><b>G298 (kcal/mol)</b> = 1.45</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: OX(6), HOX(8); HX(5), X(1); 
+HX(5)+OX(6)=HOX(8)+X(1)                             1.280000e+21 0.000     2.677    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">12.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH3X(7).png" alt="CH3X(7)" title="CH3X(7), MW = 15.03 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+18.5</td><td>+18.5</td><td>+18.5</td><td>+18.5</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(3.09e+22,'cm^2/(mol*s)'), n=0, Ea=(0,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -4.66
+    <br><b>S298 (cal/mol*K)</b> = 8.03
+    <br><b>G298 (kcal/mol)</b> = -7.06</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: CH2X(16), CH3X(7); HX(5), X(1); 
+HX(5)+CH2X(16)=CH3X(7)+X(1)                         3.090000e+22 0.000     0.000    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">22.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH3X(7).png" alt="CH3X(7)" title="CH3X(7), MW = 15.03 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+15.4</td><td>+16.5</td><td>+16.8</td><td>+17.0</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1.39e+17,'m^2/(mol*s)'), n=0.101, Ea=(19000,'J/mol'), T0=(1,'K'), Tmin=(298,'K'), Tmax=(2000,'K'), comment="""Matched reaction 24 CH2X_1 + HOX_3 <=> CH3X_4 + OX_5 in Surface_Abstraction/training
+This reaction matched rate rule [Abstracting;R-H]
+family: Surface_Abstraction""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -7.43
+    <br><b>S298 (cal/mol*K)</b> = 3.62
+    <br><b>G298 (kcal/mol)</b> = -8.51</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: HOX(8), CH3X(7); CH2X(16), OX(6); 
+! Matched reaction 24 CH2X_1 + HOX_3 <=> CH3X_4 + OX_5 in Surface_Abstraction/training
+! This reaction matched rate rule [Abstracting;R-H]
+! family: Surface_Abstraction
+HOX(8)+CH2X(16)=OX(6)+CH3X(7)                       1.390000e+21 0.101     4.541    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product2%3D1%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">13.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A"><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17), MW = 13.02 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+18.5</td><td>+18.5</td><td>+18.5</td><td>+18.5</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(3.09e+22,'cm^2/(mol*s)'), n=0, Ea=(0,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 12.67
+    <br><b>S298 (cal/mol*K)</b> = 1.32
+    <br><b>G298 (kcal/mol)</b> = 12.28</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: CHX(17), CH2X(16); HX(5), X(1); 
+HX(5)+CHX(17)=CH2X(16)+X(1)                         3.090000e+22 0.000     0.000    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A" title="Search on RMG website" class="searchlink">32.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A"><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17), MW = 13.02 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+14.5</td><td>+16.7</td><td>+17.5</td><td>+17.9</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(4.4e+18,'m^2/(mol*s)'), n=0.101, Ea=(42633.2,'J/mol'), T0=(1,'K'), Tmin=(298,'K'), Tmax=(2000,'K'), comment="""Matched reaction 26 CHX_1 + HOX_3 <=> CH2X_4 + OX_5 in Surface_Abstraction/training
+This reaction matched rate rule [Abstracting;R-H]
+family: Surface_Abstraction
+Ea raised from 42.4 to 42.6 kJ/mol to match endothermicity of reaction.""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 9.90
+    <br><b>S298 (cal/mol*K)</b> = -3.09
+    <br><b>G298 (kcal/mol)</b> = 10.82</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: HOX(8), CH2X(16); CHX(17), OX(6); 
+! Matched reaction 26 CHX_1 + HOX_3 <=> CH2X_4 + OX_5 in Surface_Abstraction/training
+! This reaction matched rate rule [Abstracting;R-H]
+! family: Surface_Abstraction
+! Ea raised from 42.4 to 42.6 kJ/mol to match endothermicity of reaction.
+HOX(8)+CHX(17)=OX(6)+CH2X(16)                       4.400000e+22 0.101     10.190   
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A" title="Search on RMG website" class="searchlink">36.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH3X(7).png" alt="CH3X(7)" title="CH3X(7), MW = 15.03 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A"><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17), MW = 13.02 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+13.8</td><td>+15.9</td><td>+16.6</td><td>+17.0</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1e+18,'m^2/(mol*s)'), n=0, Ea=(40,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Abstracting;R-H]
+Euclidian distance = 0
+Multiplied by reaction path degeneracy 2.0
+family: Surface_Abstraction""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -17.33
+    <br><b>S298 (cal/mol*K)</b> = 6.71
+    <br><b>G298 (kcal/mol)</b> = -19.33</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: CH2X(16), CH3X(7); CH2X(16), CHX(17); 
+! Exact match found for rate rule [Abstracting;R-H]
+! Euclidian distance = 0
+! Multiplied by reaction path degeneracy 2.0
+! family: Surface_Abstraction
+CH2X(16)+CH2X(16)=CH3X(7)+CHX(17)                   1.000000e+22 0.000     9.560    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A" title="Search on RMG website" class="searchlink">14.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A"><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17), MW = 13.02 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A"><img src="species/CX(15).png" alt="CX(15)" title="CX(15), MW = 12.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+18.5</td><td>+18.5</td><td>+18.5</td><td>+18.5</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(3.09e+22,'cm^2/(mol*s)'), n=0, Ea=(0,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 12.45
+    <br><b>S298 (cal/mol*K)</b> = 0.25
+    <br><b>G298 (kcal/mol)</b> = 12.38</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: CHX(17), CX(15); X(1), HX(5); 
+CHX(17)+X(1)=HX(5)+CX(15)                           3.090000e+22 0.000     0.000    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A" title="Search on RMG website" class="searchlink">38.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A"><img src="species/CX(15).png" alt="CX(15)" title="CX(15), MW = 12.01 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A"><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17), MW = 13.02 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+4.1</td><td>+10.2</td><td>+12.3</td><td>+13.3</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(2.43e+17,'m^2/(mol*s)'), n=-0.312, Ea=(118900,'J/mol'), T0=(1,'K'), Tmin=(298,'K'), Tmax=(2000,'K'), comment="""Matched reaction 28 HOX_3 + CX_1 <=> OX_5 + CHX_4  in Surface_Abstraction/training
+This reaction matched rate rule [Abstracting;R-H]
+family: Surface_Abstraction""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -15.22
+    <br><b>S298 (cal/mol*K)</b> = -4.66
+    <br><b>G298 (kcal/mol)</b> = -13.83</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: HOX(8), CHX(17); CX(15), OX(6); 
+! Matched reaction 28 HOX_3 + CX_1 <=> OX_5 + CHX_4  in Surface_Abstraction/training
+! This reaction matched rate rule [Abstracting;R-H]
+! family: Surface_Abstraction
+HOX(8)+CX(15)=OX(6)+CHX(17)                         2.430000e+21 -0.312    28.418   
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A" title="Search on RMG website" class="searchlink">42.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH3X(7).png" alt="CH3X(7)" title="CH3X(7), MW = 15.03 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A"><img src="species/CX(15).png" alt="CX(15)" title="CX(15), MW = 12.01 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A"><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17), MW = 13.02 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+14.0</td><td>+16.1</td><td>+16.8</td><td>+17.1</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1.5e+18,'m^2/(mol*s)'), n=0, Ea=(40,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Abstracting;R-H]
+Euclidian distance = 0
+Multiplied by reaction path degeneracy 3.0
+family: Surface_Abstraction""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -7.79
+    <br><b>S298 (cal/mol*K)</b> = -8.28
+    <br><b>G298 (kcal/mol)</b> = -5.32</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: CH3X(7), CHX(17); CX(15), CH2X(16); 
+! Exact match found for rate rule [Abstracting;R-H]
+! Euclidian distance = 0
+! Multiplied by reaction path degeneracy 3.0
+! family: Surface_Abstraction
+CH3X(7)+CX(15)=CH2X(16)+CHX(17)                     1.500000e+22 0.000     9.560    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A__product2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A" title="Search on RMG website" class="searchlink">44.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A"><img src="species/CX(15).png" alt="CX(15)" title="CX(15), MW = 12.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A"><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17), MW = 13.02 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A"><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17), MW = 13.02 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+13.8</td><td>+15.9</td><td>+16.6</td><td>+17.0</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1e+18,'m^2/(mol*s)'), n=0, Ea=(40,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Abstracting;R-H]
+Euclidian distance = 0
+Multiplied by reaction path degeneracy 2.0
+family: Surface_Abstraction""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -25.12
+    <br><b>S298 (cal/mol*K)</b> = -1.57
+    <br><b>G298 (kcal/mol)</b> = -24.66</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: CH2X(16), CHX(17); CX(15), CHX(17); 
+! Exact match found for rate rule [Abstracting;R-H]
+! Euclidian distance = 0
+! Multiplied by reaction path degeneracy 2.0
+! family: Surface_Abstraction
+CX(15)+CH2X(16)=CHX(17)+CHX(17)                     1.000000e+22 0.000     9.560    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A__product2%3D1%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">9.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A"><img src="species/CX(15).png" alt="CX(15)" title="CX(15), MW = 12.01 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+15.6</td><td>+15.6</td><td>+15.6</td><td>+15.6</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(3.7e+19,'cm^2/(mol*s)'), n=0, Ea=(0,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -46.51
+    <br><b>S298 (cal/mol*K)</b> = 4.28
+    <br><b>G298 (kcal/mol)</b> = -47.78</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: CX(15), OCX(14); OX(6), X(1); 
+OX(6)+CX(15)=OCX(14)+X(1)                           3.700000e+19 0.000     0.000    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p1%20c%2B1%20%7B2%2CT%7D%0A2%20C%20u0%20p1%20c-1%20%7B1%2CT%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A" title="Search on RMG website" class="searchlink">8.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p1%20c%2B1%20%7B2%2CT%7D%0A2%20C%20u0%20p1%20c-1%20%7B1%2CT%7D%0A"><img src="species/CO(13).png" alt="CO(13)" title="CO(13), MW = 28.01 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.84, n=0, Ea=(0,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -40.95
+    <br><b>S298 (cal/mol*K)</b> = -37.98
+    <br><b>G298 (kcal/mol)</b> = -29.64</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: CO(13), OCX(14); X(1), OCX(14); 
+CO(13)+X(1)=OCX(14)                                 8.400e-01 0.000     0.000    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant3%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">5.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH4(2).png" alt="CH4(2)" title="CH4(2), MW = 16.04 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH3X(7).png" alt="CH3X(7)" title="CH3X(7), MW = 15.03 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%0A"><img src="species/H2OX(9).png" alt="H2OX(9)" title="H2OX(9), MW = 18.02 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=1, n=0, Ea=(10000,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -18.85
+    <br><b>S298 (cal/mol*K)</b> = -16.84
+    <br><b>G298 (kcal/mol)</b> = -13.83</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: CH4(2), CH3X(7); X(1), H2OX(9); HOX(8), H2OX(9); 
+HOX(8)+CH4(2)+X(1)=CH3X(7)+H2OX(9)                  1.000e+00 0.000     2.390    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__reactant2%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">16.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%0A"><img src="species/H2OX(9).png" alt="H2OX(9)" title="H2OX(9), MW = 18.02 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+11.5</td><td>+13.7</td><td>+14.5</td><td>+14.9</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1e+20,'cm^2/(mol*s)'), n=0, Ea=(43100,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 22.05
+    <br><b>S298 (cal/mol*K)</b> = -8.39
+    <br><b>G298 (kcal/mol)</b> = 24.55</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: H2OX(9), HOX(8); OX(6), HOX(8); 
+OX(6)+H2OX(9)=HOX(8)+HOX(8)                         1.000000e+20 0.000     10.301   
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%0A__product2%3D1%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">18.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%0A"><img src="species/H2OX(9).png" alt="H2OX(9)" title="H2OX(9), MW = 18.02 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+10.4</td><td>+13.9</td><td>+15.0</td><td>+15.6</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(2.04e+21,'cm^2/(mol*s)'), n=0, Ea=(66220,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -19.28
+    <br><b>S298 (cal/mol*K)</b> = 12.81
+    <br><b>G298 (kcal/mol)</b> = -23.09</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: HOX(8), H2OX(9); HX(5), X(1); 
+HX(5)+HOX(8)=H2OX(9)+X(1)                           2.040000e+21 0.000     15.827   
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">6.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/H2O(10).png" alt="H2O(10)" title="H2O(10), MW = 18.02 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%0A"><img src="species/H2OX(9).png" alt="H2OX(9)" title="H2OX(9), MW = 18.02 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.75, n=0, Ea=(0,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -5.17
+    <br><b>S298 (cal/mol*K)</b> = -22.47
+    <br><b>G298 (kcal/mol)</b> = 1.53</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: H2O(10), H2OX(9); X(1), H2OX(9); 
+H2O(10)+X(1)=H2OX(9)                                7.500e-01 0.000     0.000    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Adsorption_Dissociative rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__reactant3%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">30.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/H2O(10).png" alt="H2O(10)" title="H2O(10), MW = 18.02 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Adsorption_Dissociative</td>
+</tr>
+<tr class="kinetics Surface_Adsorption_Dissociative hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.02, n=0, Ea=(62.3442,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Adsorbate;VacantSite1;VacantSite2]
+Euclidian distance = 0
+Multiplied by reaction path degeneracy 2.0
+family: Surface_Adsorption_Dissociative
+Ea raised from 59.0 to 62.3 kJ/mol to match endothermicity of reaction.""")</span></td>
+</tr>
+<tr class="energy Surface_Adsorption_Dissociative hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 14.11
+    <br><b>S298 (cal/mol*K)</b> = -35.28
+    <br><b>G298 (kcal/mol)</b> = 24.62</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Adsorption_Dissociative hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Adsorption_Dissociative
+! Flux pairs: H2O(10), HX(5); H2O(10), HOX(8); 
+! Exact match found for rate rule [Adsorbate;VacantSite1;VacantSite2]
+! Euclidian distance = 0
+! Multiplied by reaction path degeneracy 2.0
+! family: Surface_Adsorption_Dissociative
+! Ea raised from 59.0 to 62.3 kJ/mol to match endothermicity of reaction.
+H2O(10)+X(1)+X(1)=HX(5)+HOX(8)                      2.000e-02 0.000     14.901   
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__reactant2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B2%2CD%7D%0A4%20X%20u0%20p0%20c0%0A__product2%3D1%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">10.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B2%2CD%7D%0A4%20X%20u0%20p0%20c0%0A"><img src="species/CO2X(12).png" alt="CO2X(12)" title="CO2X(12), MW = 44.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+5.3</td><td>+11.4</td><td>+13.5</td><td>+14.5</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(3.7e+21,'cm^2/(mol*s)'), n=0, Ea=(117600,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 13.39
+    <br><b>S298 (cal/mol*K)</b> = 15.99
+    <br><b>G298 (kcal/mol)</b> = 8.63</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: OCX(14), CO2X(12); OX(6), X(1); 
+OX(6)+OCX(14)=CO2X(12)+X(1)                         3.700000e+21 0.000     28.107   
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B2%2CD%7D%0A4%20X%20u0%20p0%20c0%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A" title="Search on RMG website" class="searchlink">11.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B2%2CD%7D%0A4%20X%20u0%20p0%20c0%0A"><img src="species/CO2X(12).png" alt="CO2X(12)" title="CO2X(12), MW = 44.01 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+14.1</td><td>+14.6</td><td>+14.7</td><td>+14.8</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1e+19,'cm^2/(mol*s)'), n=0, Ea=(8400,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -10.62
+    <br><b>S298 (cal/mol*K)</b> = -11.58
+    <br><b>G298 (kcal/mol)</b> = -7.17</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: CO2X(12), OCX(14); HX(5), HOX(8); 
+HX(5)+CO2X(12)=HOX(8)+OCX(14)                       1.000000e+19 0.000     2.008    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B2%2CD%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B2%2CD%7D%0A4%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">7.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B2%2CD%7D%0A"><img src="species/CO2(11).png" alt="CO2(11)" title="CO2(11), MW = 44.01 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B2%2CD%7D%0A4%20X%20u0%20p0%20c0%0A"><img src="species/CO2X(12).png" alt="CO2X(12)" title="CO2X(12), MW = 44.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.005, n=0, Ea=(0,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 6.47
+    <br><b>S298 (cal/mol*K)</b> = -22.53
+    <br><b>G298 (kcal/mol)</b> = 13.18</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: CO2(11), CO2X(12); X(1), CO2X(12); 
+CO2(11)+X(1)=CO2X(12)                               5.000e-03 0.000     0.000    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Adsorption_vdW rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p1%20c%2B1%20%7B2%2CT%7D%0A2%20C%20u0%20p1%20c-1%20%7B1%2CT%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20O%20u0%20p1%20c%2B1%20%7B2%2CT%7D%0A2%20C%20u0%20p1%20c-1%20%7B1%2CT%7D%0A3%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">63.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p1%20c%2B1%20%7B2%2CT%7D%0A2%20C%20u0%20p1%20c-1%20%7B1%2CT%7D%0A"><img src="species/CO(13).png" alt="CO(13)" title="CO(13), MW = 28.01 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p1%20c%2B1%20%7B2%2CT%7D%0A2%20C%20u0%20p1%20c-1%20%7B1%2CT%7D%0A3%20X%20u0%20p0%20c0%0A"><img src="species/COX(51).png" alt="COX(51)" title="COX(51), MW = 28.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Adsorption_vdW</td>
+</tr>
+<tr class="kinetics Surface_Adsorption_vdW hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.1, n=0, Ea=(26.4446,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Adsorbate;VacantSite]
+Euclidian distance = 0
+family: Surface_Adsorption_vdW
+Ea raised from 0.0 to 26.4 kJ/mol to match endothermicity of reaction.""")</span></td>
+</tr>
+<tr class="energy Surface_Adsorption_vdW hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = 6.47
+    <br><b>S298 (cal/mol*K)</b> = -22.53
+    <br><b>G298 (kcal/mol)</b> = 13.18</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Adsorption_vdW hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Adsorption_vdW
+! Flux pairs: X(1), COX(51); CO(13), COX(51); 
+! Exact match found for rate rule [Adsorbate;VacantSite]
+! Euclidian distance = 0
+! family: Surface_Adsorption_vdW
+! Ea raised from 0.0 to 26.4 kJ/mol to match endothermicity of reaction.
+CO(13)+X(1)=COX(51)                                 1.000e-01 0.000     6.320    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__reactant3%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">1.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/H2(4).png" alt="H2(4)" title="H2(4), MW = 2.02 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.046, n=0, Ea=(0,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -12.88
+    <br><b>S298 (cal/mol*K)</b> = -29.18
+    <br><b>G298 (kcal/mol)</b> = -4.19</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: X(1), HX(5); H2(4), HX(5); X(1), HX(5); 
+H2(4)+X(1)+X(1)=HX(5)+HX(5)                         4.600e-02 0.000     0.000    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_CPOX_Pt_Deutschmann2006 rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A" title="Search on RMG website" class="searchlink">17.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/H2(4).png" alt="H2(4)" title="H2(4), MW = 2.02 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A"><img src="species/CX(15).png" alt="CX(15)" title="CX(15), MW = 12.01 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface/CPOX_Pt/Deutschmann2006</td>
+</tr>
+<tr class="kinetics Surface_CPOX_Pt_Deutschmann2006 hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.04, n=0, Ea=(29700,'J/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'))</span></td>
+</tr>
+<tr class="energy Surface_CPOX_Pt_Deutschmann2006 hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -12.66
+    <br><b>S298 (cal/mol*K)</b> = -28.10
+    <br><b>G298 (kcal/mol)</b> = -4.29</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_CPOX_Pt_Deutschmann2006 hide_chemkin">
+    <td></td>
+    <td colspan="4">! Library reaction: Surface/CPOX_Pt/Deutschmann2006
+! Flux pairs: H2(4), CH2X(16); CX(15), CH2X(16); 
+H2(4)+CX(15)=CH2X(16)                               4.000e-02 0.000     7.098    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Adsorption_Single rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20X%20u0%20p0%20c0%0A__reactant2%3Dmultiplicity%202%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">25.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20O%20u1%20p2%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/OH(D)(23).png" alt="OH(D)(23)" title="OH(D)(23), MW = 17.01 g/mol" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Adsorption_Single</td>
+</tr>
+<tr class="kinetics Surface_Adsorption_Single hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.1, n=0, Ea=(0,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Adsorbate;VacantSite]
+Euclidian distance = 0
+family: Surface_Adsorption_Single""")</span></td>
+</tr>
+<tr class="energy Surface_Adsorption_Single hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -46.11
+    <br><b>S298 (cal/mol*K)</b> = -35.18
+    <br><b>G298 (kcal/mol)</b> = -35.63</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Adsorption_Single hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Adsorption_Single
+! Flux pairs: OH(D)(23), HOX(8); X(1), HOX(8); 
+! Exact match found for rate rule [Adsorbate;VacantSite]
+! Euclidian distance = 0
+! family: Surface_Adsorption_Single
+X(1)+OH(D)(23)=HOX(8)                               1.000e-01 0.000     0.000    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Dissociation rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B3%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CS%7D%20%7B2%2CD%7D%20%7B5%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B3%2CS%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A" title="Search on RMG website" class="searchlink">55.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B3%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CS%7D%20%7B2%2CD%7D%20%7B5%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B3%2CS%7D%0A"><img src="species/HOCOX(46).png" alt="HOCOX(46)" title="HOCOX(46), MW = 45.02 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Dissociation</td>
+</tr>
+<tr class="kinetics Surface_Dissociation hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+13.9</td><td>+16.7</td><td>+17.6</td><td>+18.0</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1.46e+20,'m^2/(mol*s)'), n=-0.213, Ea=(54300,'J/mol'), T0=(1,'K'), Tmin=(298,'K'), Tmax=(2000,'K'), comment="""Matched reaction 44 HOCXO_1 + Ni_4 <=> OCX_3 + HOX_5 in Surface_Dissociation/training
+This reaction matched rate rule [Combined;VacantSite]
+family: Surface_Dissociation""")</span></td>
+</tr>
+<tr class="energy Surface_Dissociation hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -19.07
+    <br><b>S298 (cal/mol*K)</b> = -9.53
+    <br><b>G298 (kcal/mol)</b> = -16.23</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Dissociation hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Dissociation
+! Flux pairs: HOCOX(46), HOX(8); HOCOX(46), OCX(14); 
+! Matched reaction 44 HOCXO_1 + Ni_4 <=> OCX_3 + HOX_5 in Surface_Dissociation/training
+! This reaction matched rate rule [Combined;VacantSite]
+! family: Surface_Dissociation
+HOCOX(46)+X(1)=HOX(8)+OCX(14)                       1.460000e+24 -0.213    12.978   
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Adsorption_vdW rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%0A" title="Search on RMG website" class="searchlink">64.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/H2(4).png" alt="H2(4)" title="H2(4), MW = 2.02 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%0A"><img src="species/[H][H].[Pt](52).png" alt="H2X(52)" title="H2X(52), MW = 2.02 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Adsorption_vdW</td>
+</tr>
+<tr class="kinetics Surface_Adsorption_vdW hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.1, n=0, Ea=(0,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Adsorbate;VacantSite]
+Euclidian distance = 0
+family: Surface_Adsorption_vdW""")</span></td>
+</tr>
+<tr class="energy Surface_Adsorption_vdW hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -1.40
+    <br><b>S298 (cal/mol*K)</b> = -7.84
+    <br><b>G298 (kcal/mol)</b> = 0.94</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Adsorption_vdW hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Adsorption_vdW
+! Flux pairs: X(1), H2X(52); H2(4), H2X(52); 
+! Exact match found for rate rule [Adsorbate;VacantSite]
+! Euclidian distance = 0
+! family: Surface_Adsorption_vdW
+H2(4)+X(1)=H2X(52)                                  1.000e-01 0.000     0.000    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Dissociation rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20X%20u0%20p0%20c0%0A__reactant2%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B1%2CS%7D%20%7B3%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">26.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B1%2CS%7D%20%7B3%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/OO[Pt](24).png" alt="HO2X(24)" title="HO2X(24), MW = 33.01 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Dissociation</td>
+</tr>
+<tr class="kinetics Surface_Dissociation hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+12.7</td><td>+14.8</td><td>+15.6</td><td>+15.9</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1e+17,'m^2/(mol*s)'), n=0, Ea=(41.1856,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Combined;VacantSite]
+Euclidian distance = 0
+family: Surface_Dissociation""")</span></td>
+</tr>
+<tr class="energy Surface_Dissociation hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -40.96
+    <br><b>S298 (cal/mol*K)</b> = -6.33
+    <br><b>G298 (kcal/mol)</b> = -39.07</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Dissociation hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Dissociation
+! Flux pairs: HO2X(24), HOX(8); HO2X(24), OX(6); 
+! Exact match found for rate rule [Combined;VacantSite]
+! Euclidian distance = 0
+! family: Surface_Dissociation
+X(1)+HO2X(24)=OX(6)+HOX(8)                          1.000000e+21 0.000     9.844    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A__reactant2%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B1%2CS%7D%20%7B3%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B3%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CS%7D%20%7B2%2CD%7D%20%7B5%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B3%2CS%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A" title="Search on RMG website" class="searchlink">66.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B1%2CS%7D%20%7B3%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/OO[Pt](24).png" alt="HO2X(24)" title="HO2X(24), MW = 33.01 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B3%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B3%2CD%7D%0A3%20C%20u0%20p0%20c0%20%7B1%2CS%7D%20%7B2%2CD%7D%20%7B5%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B3%2CS%7D%0A"><img src="species/HOCOX(46).png" alt="HOCOX(46)" title="HOCOX(46), MW = 45.02 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+6.6</td><td>+10.8</td><td>+12.2</td><td>+12.9</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(1e+15,'m^2/(mol*s)'), n=0, Ea=(80,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Estimated using template [Abstracting;Donating] for rate rule [Abstracting;R-OH]
+Euclidian distance = 2.0
+family: Surface_Abstraction""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -21.89
+    <br><b>S298 (cal/mol*K)</b> = 3.20
+    <br><b>G298 (kcal/mol)</b> = -22.84</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: HO2X(24), HOCOX(46); OCX(14), OX(6); 
+! Estimated using template [Abstracting;Donating] for rate rule [Abstracting;R-OH]
+! Euclidian distance = 2.0
+! family: Surface_Abstraction
+OCX(14)+HO2X(24)=HOCOX(46)+OX(6)                    1.000000e+19 0.000     19.120   
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A" title="Search on RMG website" class="searchlink">52.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A"><img src="species/O=C[Pt](44).png" alt="CHOX(44)" title="CHOX(44), MW = 29.02 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%20%7B5%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A5%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/CH3X(7).png" alt="CH3X(7)" title="CH3X(7), MW = 15.03 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+13.5</td><td>+15.6</td><td>+16.3</td><td>+16.7</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(5e+17,'m^2/(mol*s)'), n=0, Ea=(40,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Abstracting;R-H]
+Euclidian distance = 0
+family: Surface_Abstraction""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -24.74
+    <br><b>S298 (cal/mol*K)</b> = 1.48
+    <br><b>G298 (kcal/mol)</b> = -25.18</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: CHOX(44), CH3X(7); CH2X(16), OCX(14); 
+! Exact match found for rate rule [Abstracting;R-H]
+! Euclidian distance = 0
+! family: Surface_Abstraction
+CHOX(44)+CH2X(16)=CH3X(7)+OCX(14)                   5.000000e+21 0.000     9.560    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A__reactant2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A" title="Search on RMG website" class="searchlink">54.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A"><img src="species/O=C[Pt](44).png" alt="CHOX(44)" title="CHOX(44), MW = 29.02 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/OX(6).png" alt="OX(6)" title="OX(6), MW = 16.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HOX(8).png" alt="HOX(8)" title="HOX(8), MW = 17.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+13.5</td><td>+15.6</td><td>+16.3</td><td>+16.7</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(5e+17,'m^2/(mol*s)'), n=0, Ea=(40,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Abstracting;R-H]
+Euclidian distance = 0
+family: Surface_Abstraction""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -17.31
+    <br><b>S298 (cal/mol*K)</b> = -2.14
+    <br><b>G298 (kcal/mol)</b> = -16.67</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: CHOX(44), HOX(8); OX(6), OCX(14); 
+! Exact match found for rate rule [Abstracting;R-H]
+! Euclidian distance = 0
+! family: Surface_Abstraction
+CHOX(44)+OX(6)=HOX(8)+OCX(14)                       5.000000e+21 0.000     9.560    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Dissociation rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A" title="Search on RMG website" class="searchlink">56.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A"><img src="species/O=C[Pt](44).png" alt="CHOX(44)" title="CHOX(44), MW = 29.02 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Dissociation</td>
+</tr>
+<tr class="kinetics Surface_Dissociation hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+17.6</td><td>+17.6</td><td>+17.6</td><td>+17.6</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(3.71e+17,'m^2/(mol*s)'), n=0, Ea=(0,'J/mol'), T0=(1,'K'), Tmin=(298,'K'), Tmax=(2000,'K'), comment="""Matched reaction 48 CXHO_1 + Ni_4 <=> OCX_3 + HX_5 in Surface_Dissociation/training
+This reaction matched rate rule [Combined;VacantSite]
+family: Surface_Dissociation""")</span></td>
+</tr>
+<tr class="energy Surface_Dissociation hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -20.08
+    <br><b>S298 (cal/mol*K)</b> = -6.55
+    <br><b>G298 (kcal/mol)</b> = -18.13</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Dissociation hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Dissociation
+! Flux pairs: CHOX(44), HX(5); CHOX(44), OCX(14); 
+! Matched reaction 48 CXHO_1 + Ni_4 <=> OCX_3 + HX_5 in Surface_Dissociation/training
+! This reaction matched rate rule [Combined;VacantSite]
+! family: Surface_Dissociation
+CHOX(44)+X(1)=HX(5)+OCX(14)                         3.710000e+21 0.000     0.000    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A__product1%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A__product2%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A" title="Search on RMG website" class="searchlink">58.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A"><img src="species/O=C[Pt](44).png" alt="CHOX(44)" title="CHOX(44), MW = 29.02 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A"><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17), MW = 13.02 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%20%7B4%2CD%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CD%7D%0A"><img src="species/CH2X(16).png" alt="CH2X(16)" title="CH2X(16), MW = 14.03 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+13.5</td><td>+15.6</td><td>+16.3</td><td>+16.7</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(5e+17,'m^2/(mol*s)'), n=0, Ea=(40,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Abstracting;R-H]
+Euclidian distance = 0
+family: Surface_Abstraction""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -7.41
+    <br><b>S298 (cal/mol*K)</b> = -5.23
+    <br><b>G298 (kcal/mol)</b> = -5.85</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: CHOX(44), CH2X(16); CHX(17), OCX(14); 
+! Exact match found for rate rule [Abstracting;R-H]
+! Euclidian distance = 0
+! family: Surface_Abstraction
+CHOX(44)+CHX(17)=CH2X(16)+OCX(14)                   5.000000e+21 0.000     9.560    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Abstraction rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A__reactant2%3D1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A__product2%3D1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A" title="Search on RMG website" class="searchlink">60.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CS%7D%20%7B4%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B2%2CS%7D%0A"><img src="species/O=C[Pt](44).png" alt="CHOX(44)" title="CHOX(44), MW = 29.02 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CQ%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CQ%7D%0A"><img src="species/CX(15).png" alt="CX(15)" title="CX(15), MW = 12.01 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CD%7D%0A2%20C%20u0%20p0%20c0%20%7B1%2CD%7D%20%7B3%2CD%7D%0A3%20X%20u0%20p0%20c0%20%7B2%2CD%7D%0A"><img src="species/OCX(14).png" alt="OCX(14)" title="OCX(14), MW = 28.01 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20C%20u0%20p0%20c0%20%7B2%2CS%7D%20%7B3%2CT%7D%0A2%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A3%20X%20u0%20p0%20c0%20%7B1%2CT%7D%0A"><img src="species/CHX(17).png" alt="CHX(17)" title="CHX(17), MW = 13.02 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Abstraction</td>
+</tr>
+<tr class="kinetics Surface_Abstraction hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>+13.5</td><td>+15.6</td><td>+16.3</td><td>+16.7</td>
+</tr></table><span class='KineticsData_repr'>SurfaceArrhenius(A=(5e+17,'m^2/(mol*s)'), n=0, Ea=(40,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Abstracting;R-H]
+Euclidian distance = 0
+family: Surface_Abstraction""")</span></td>
+</tr>
+<tr class="energy Surface_Abstraction hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -32.53
+    <br><b>S298 (cal/mol*K)</b> = -6.80
+    <br><b>G298 (kcal/mol)</b> = -30.51</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Abstraction hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Abstraction
+! Flux pairs: CHOX(44), CHX(17); CX(15), OCX(14); 
+! Exact match found for rate rule [Abstracting;R-H]
+! Euclidian distance = 0
+! family: Surface_Abstraction
+CHOX(44)+CX(15)=OCX(14)+CHX(17)                     5.000000e+21 0.000     9.560    
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Adsorption_Single rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3Dmultiplicity%202%0A1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A__reactant2%3D1%20X%20u0%20p0%20c0%0A__product1%3D1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B1%2CS%7D%20%7B3%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">79.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B3%2CS%7D%0A2%20O%20u1%20p2%20c0%20%7B1%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HO2(63).png" alt="HO2(63)" title="HO2(63), MW = 33.01 g/mol" ></a> + <a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20O%20u0%20p2%20c0%20%7B2%2CS%7D%20%7B4%2CS%7D%0A2%20O%20u0%20p2%20c0%20%7B1%2CS%7D%20%7B3%2CS%7D%0A3%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A4%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/OO[Pt](24).png" alt="HO2X(24)" title="HO2X(24), MW = 33.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Adsorption_Single</td>
+</tr>
+<tr class="kinetics Surface_Adsorption_Single hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.1, n=0, Ea=(0,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Adsorbate;VacantSite]
+Euclidian distance = 0
+family: Surface_Adsorption_Single""")</span></td>
+</tr>
+<tr class="energy Surface_Adsorption_Single hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -32.72
+    <br><b>S298 (cal/mol*K)</b> = -36.25
+    <br><b>G298 (kcal/mol)</b> = -21.92</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Adsorption_Single hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Adsorption_Single
+! Flux pairs: HO2(63), HO2X(24); X(1), HO2X(24); 
+! Exact match found for rate rule [Adsorbate;VacantSite]
+! Euclidian distance = 0
+! family: Surface_Adsorption_Single
+HO2(63)+X(1)=HO2X(24)                               1.000e-01 0.000     0.000    
+    STICK
+</td>
+</tr>
+</tbody>
+
+<tbody class="reaction">
+<tr class="Surface_Adsorption_Single rxnStart">
+    <td class="index"><a href="http://rmg.mit.edu/database/kinetics/reaction/reactant1%3D1%20X%20u0%20p0%20c0%0A__reactant2%3Dmultiplicity%202%0A1%20H%20u1%20p0%20c0%0A__product1%3D1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A" title="Search on RMG website" class="searchlink">29.</a></td>
+    <td class="reactants"><a href="http://rmg.mit.edu/database/molecule/1%20X%20u0%20p0%20c0%0A"><img src="species/X(1).png" alt="X(1)" title="X(1), MW = 0.00 g/mol" class="surface_species" ></a> + <a href="http://rmg.mit.edu/database/molecule/multiplicity%202%0A1%20H%20u1%20p0%20c0%0A"><img src="species/H(27).png" alt="H(27)" title="H(27), MW = 1.01 g/mol" ></a></td>
+    <td class="reactionArrow">&hArr;</td>
+    <td class="products"><a href="http://rmg.mit.edu/database/molecule/1%20H%20u0%20p0%20c0%20%7B2%2CS%7D%0A2%20X%20u0%20p0%20c0%20%7B1%2CS%7D%0A"><img src="species/HX(5).png" alt="HX(5)" title="HX(5), MW = 1.01 g/mol" class="surface_species" ></a></td>
+    <td class="family">Surface_Adsorption_Single</td>
+</tr>
+<tr class="kinetics Surface_Adsorption_Single hide_kinetics">
+    <td></td>
+    <td colspan="4"><table class="KineticsData">
+<tr class="KineticsData_Tdata"><th>T/[K]</th>
+<td>500</td><td>1000</td><td>1500</td><td>2000</td>
+</tr><tr class="KineticsData_kdata"><th>log<sub>10</sub>(k/[mole,m,s])
+    <td>An error occurred in processing kinetics</td>
+</tr></table><span class='KineticsData_repr'>StickingCoefficient(A=0.1, n=0, Ea=(0,'kJ/mol'), T0=(1,'K'), Tmin=(200,'K'), Tmax=(3000,'K'), comment="""Exact match found for rate rule [Adsorbate;VacantSite]
+Euclidian distance = 0
+family: Surface_Adsorption_Single""")</span></td>
+</tr>
+<tr class="energy Surface_Adsorption_Single hide_energy">
+    <td></td>
+    <td colspan="3"><b>H298 (kcal/mol)</b> = -58.54
+    <br><b>S298 (cal/mol*K)</b> = -26.39
+    <br><b>G298 (kcal/mol)</b> = -50.68</td>
+    <td></td>
+</tr>
+<tr class="chemkin Surface_Adsorption_Single hide_chemkin">
+    <td></td>
+    <td colspan="4">! Template reaction: Surface_Adsorption_Single
+! Flux pairs: H(27), HX(5); X(1), HX(5); 
+! Exact match found for rate rule [Adsorbate;VacantSite]
+! Euclidian distance = 0
+! family: Surface_Adsorption_Single
+X(1)+H(27)=HX(5)                                    1.000e-01 0.000     0.000    
+    STICK
+</td>
+</tr>
+</tbody>
+
+
+</table>
+
+</body>
+
+</html>
