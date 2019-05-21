@@ -1,0 +1,2835 @@
+Global RMG Settings:
+   test_data.directory  = /home/kblondal/Dropbox/Code/Main/RMG-Py/rmgpy/test_data (Default, relative to RMG-Py source code)
+   database.directory   = /home/kblondal/Dropbox/Code/Main/RMG-database/input (Default, relative to RMG-Py source code)
+RMG execution initiated at Tue May 21 16:16:50 2019
+
+#########################################################
+# RMG-Py - Reaction Mechanism Generator in Python       #
+# Version: 2.3.0                                        #
+# Authors: RMG Developers (rmg_dev@mit.edu)             #
+# P.I.s:   William H. Green (whgreen@mit.edu)           #
+#          Richard H. West (r.west@neu.edu)             #
+# Website: http://reactionmechanismgenerator.github.io/ #
+#########################################################
+
+The current git HEAD for RMG-Py is:
+	baed747437de637160dea40e71b1e82d81dbf846
+	Mon May 13 17:14:34 2019 -0400
+
+The current git HEAD for RMG-database is:
+	febf00b4d89e47a05a37a38c311e7fea8d4bd8e5
+	Tue May 14 18:18:55 2019 -0400
+
+Reading input file "/home/kblondal/Dropbox/Code/Main/inputfiles/190520_bidentate_Doublebond_test/input.py"...
+#Data sources
+database(
+    thermoLibraries=['surfaceThermoPt', 'primaryThermoLibrary', 'thermo_DFT_CCSDTF12_BAC','DFT_QCI_thermo'],
+    #reactionLibraries = [('CPOX_Pt/Deutschmann2006', False),('BurkeH2O2inN2',False),('combustion_core/version5',False)],
+    #reactionLibraries = [('Surface/CPOX_Pt/Deutschmann2006', False),('BurkeH2O2inN2',False),('ERC-FoundationFuelv0.9',False),('NOx2018',False)],
+    reactionLibraries = [('Surface/CPOX_Pt/Deutschmann2006', False)],
+    seedMechanisms = [],
+    kineticsDepositories = ['training'],
+    kineticsFamilies =['surface'],
+    kineticsEstimator = 'rate rules',
+)
+
+catalystProperties(
+    bindingEnergies = {
+                        'H': (-2.479, 'eV/molecule'),
+                        'O': (-3.586, 'eV/molecule'),
+                        'C': (-6.750, 'eV/molecule'),
+                        'N': (-4.352, 'eV/molecule'),
+                    },
+    surfaceSiteDensity=(2.72e-9, 'mol/cm^2'),
+)
+
+generatedSpeciesConstraints(
+    allowed=['reaction libraries'],
+)
+
+
+# List of species
+species(
+    label='X',
+    reactive=True,
+    structure=adjacencyList("1 X u0"),
+)
+
+species(
+    label='HCO_ads',
+    reactive=True,
+    structure=adjacencyList(
+        """
+1 X  u0  p0 c0 {2,S}
+2 C  u0  p0 c0 {1,S} {3,D} {4,S}
+3 O  u0  p2 c0 {2,D}
+4 H  u0  p0 c0 {2,S}
+"""),
+)
+
+species(
+    label='CH4',
+    reactive=True,
+    structure=SMILES("[CH4]"),
+)
+species(
+   label='O2',
+   reactive=True,
+   structure=adjacencyList(
+       """
+1 O u1 p2 c0 {2,S}
+2 O u1 p2 c0 {1,S}
+"""),
+)
+
+species(
+    label='N2',
+    reactive=False,
+    structure=SMILES("N#N"),
+)
+
+
+#----------
+
+surfaceReactor(
+    temperature=(900,'K'),
+    initialPressure=(1.0, 'bar'),
+    initialGasMoleFractions={
+        "CH4": 0.0500,
+        "O2": 0.1995,
+        "N2": 0.7505,
+    },
+    initialSurfaceCoverages={
+        "X": 0.5,
+        "HCO_ads": 0.5,
+    },
+    surfaceVolumeRatio=(1.0e4, 'm^-1'),
+    terminationConversion = { "CH4":0.9,}
+#    terminationTime=(1000., 's'),
+#    terminationConversion={'O2': 0.99,}
+)
+
+#surfaceReactor(
+#    temperature=(1500,'K'),
+#    initialPressure=(1.0, 'bar'),
+#    initialGasMoleFractions={
+#        "CH4": 0.0500,
+#        "O2": 0.1995,
+#        "N2": 0.7505,
+#    },
+#    initialSurfaceCoverages={
+#        "X": 1.0,
+#    },
+#    surfaceVolumeRatio=(1.0e4, 'm^-1'),
+#    terminationConversion = { "CH4":0.9,}
+#    terminationTime=(1000., 's'),
+#    terminationConversion={'O2': 0.99,}
+#)
+
+
+
+simulator(
+    atol=1e-18,
+    rtol=1e-12,
+)
+
+model(
+    toleranceKeepInEdge=0.01,
+#    toleranceMoveToCore=1e-4,
+#    toleranceMoveToCore=0.001,
+    toleranceMoveToCore=0.0001,
+    toleranceInterruptSimulation=0.1,
+    maximumEdgeSpecies=100000
+)
+
+options(
+    units='si',
+    saveRestartPeriod=None,
+    generateOutputHTML=True,
+    generatePlots=False,
+    saveEdgeSpecies=True,
+    saveSimulationProfiles=True,
+)
+
+
+
+Surface reaction system 1
+Gas phase mole fractions:
+  N2                   0.7505
+  CH4                  0.05
+  O2                   0.1995
+Total gas phase:          1 moles
+Pressure:                 1e+05 Pa
+Temperature:              900.0 K
+Reactor volume:           0.0748 m3
+Surface/volume ratio:     1e+04 m2/m3
+Surface site density:     2.72e-05 mol/m2
+Surface sites in reactor: 0.0204 moles
+Initial surface coverages (and amounts):
+  X                  0.5 = 0.010177 moles
+  HCO_ads            0.5 = 0.010177 moles
+Warning: Generate Output HTML option was turned on. Note that this will slow down model generation.
+Warning: Edge species saving was turned on. This will slow down model generation for large simulations.
+
+Loading thermodynamics library from surfaceThermoPt.py in /home/kblondal/Dropbox/Code/Main/RMG-database/input/thermo/libraries...
+Loading thermodynamics library from primaryThermoLibrary.py in /home/kblondal/Dropbox/Code/Main/RMG-database/input/thermo/libraries...
+Loading thermodynamics library from thermo_DFT_CCSDTF12_BAC.py in /home/kblondal/Dropbox/Code/Main/RMG-database/input/thermo/libraries...
+Loading thermodynamics library from DFT_QCI_thermo.py in /home/kblondal/Dropbox/Code/Main/RMG-database/input/thermo/libraries...
+Loading thermodynamics group database from /home/kblondal/Dropbox/Code/Main/RMG-database/input/thermo/groups...
+Loading transport library from PrimaryTransportLibrary.py in /home/kblondal/Dropbox/Code/Main/RMG-database/input/transport/libraries...
+Loading transport library from GRI-Mech.py in /home/kblondal/Dropbox/Code/Main/RMG-database/input/transport/libraries...
+Loading transport library from NOx2018.py in /home/kblondal/Dropbox/Code/Main/RMG-database/input/transport/libraries...
+Loading transport library from OneDMinN2.py in /home/kblondal/Dropbox/Code/Main/RMG-database/input/transport/libraries...
+Loading transport group database from /home/kblondal/Dropbox/Code/Main/RMG-database/input/transport/groups...
+Warning: Requested depository /home/kblondal/Dropbox/Code/Main/RMG-database/input/kinetics/families/Surface_Adsorption_Single/training/reactions.py does not exist
+Warning: Requested depository /home/kblondal/Dropbox/Code/Main/RMG-database/input/kinetics/families/Surface_Adsorption_vdW/training/reactions.py does not exist
+Warning: Requested depository /home/kblondal/Dropbox/Code/Main/RMG-database/input/kinetics/families/Surface_Bidentate_Dissociation/training/reactions.py does not exist
+Warning: Requested depository /home/kblondal/Dropbox/Code/Main/RMG-database/input/kinetics/families/Surface_DoubleBond_to_Bidentate/training/reactions.py does not exist
+Loading kinetics library Surface/CPOX_Pt/Deutschmann2006 from /home/kblondal/Dropbox/Code/Main/RMG-database/input/kinetics/libraries/Surface/CPOX_Pt/Deutschmann2006/reactions.py...
+Loading frequencies group database from /home/kblondal/Dropbox/Code/Main/RMG-database/input/statmech/groups...
+Loading Platts additivity group database from /home/kblondal/Dropbox/Code/Main/RMG-database/input/solvation/groups...
+Trimolecular reactions are turned on
+Adding rate rules from training set in kinetics families...
+Could not find training depository in family Surface_Bidentate_Dissociation.
+Must be because you turned off the training depository.
+Could not find training depository in family Surface_Adsorption_Single.
+Must be because you turned off the training depository.
+Could not find training depository in family Surface_DoubleBond_to_Bidentate.
+Must be because you turned off the training depository.
+Could not find training depository in family Surface_Adsorption_vdW.
+Must be because you turned off the training depository.
+Filling in rate rules in kinetics families by averaging...
+Adding reaction library Surface/CPOX_Pt/Deutschmann2006 to model edge...
+
+Summary of Model Enlargement
+---------------------------------
+Added 0 new core species
+Created 14 new edge species
+    H2(5)
+    HX(6)
+    OX(7)
+    CH3X(8)
+    HOX(9)
+    H2OX(10)
+    H2O(11)
+    CO2(12)
+    CO2X(13)
+    CO(14)
+    OCX(15)
+    CX(16)
+    CH2X(17)
+    CHX(18)
+Added 0 new core reactions
+Created 18 new edge reactions
+    H2(5) + X(1) + X(1) <=> HX(6) + HX(6)
+    O2(4) + X(1) + X(1) <=> OX(7) + OX(7)
+    CH4(3) + X(1) + X(1) <=> HX(6) + CH3X(8)
+    OX(7) + CH4(3) + X(1) <=> CH3X(8) + HOX(9)
+    HOX(9) + CH4(3) + X(1) <=> CH3X(8) + H2OX(10)
+    H2O(11) + X(1) <=> H2OX(10)
+    CO2(12) + X(1) <=> CO2X(13)
+    CO(14) + X(1) <=> OCX(15)
+    OX(7) + CX(16) <=> OCX(15) + X(1)
+    OX(7) + OCX(15) <=> CO2X(13) + X(1)
+    HX(6) + CO2X(13) <=> HOX(9) + OCX(15)
+    HX(6) + CH2X(17) <=> CH3X(8) + X(1)
+    HX(6) + CHX(18) <=> CH2X(17) + X(1)
+    CHX(18) + X(1) <=> HX(6) + CX(16)
+    HX(6) + OX(7) <=> HOX(9) + X(1)
+    OX(7) + H2OX(10) <=> HOX(9) + HOX(9)
+    H2(5) + CX(16) <=> CH2X(17)
+    HX(6) + HOX(9) <=> H2OX(10) + X(1)
+
+After model enlargement:
+    The model core has 0 species and 0 reactions
+    The model edge has 19 species and 18 reactions
+
+NOT generating reactions for unreactive species N2
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    N2
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 1 species and 0 reactions
+    The model edge has 18 species and 18 reactions
+
+
+NOT generating reactions for unreactive species Ar
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    Ar
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 2 species and 0 reactions
+    The model edge has 18 species and 18 reactions
+
+
+NOT generating reactions for unreactive species He
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    He
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 3 species and 0 reactions
+    The model edge has 18 species and 18 reactions
+
+
+NOT generating reactions for unreactive species Ne
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    Ne
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 4 species and 0 reactions
+    The model edge has 18 species and 18 reactions
+
+
+Adding species X(1) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    X(1)
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 5 species and 0 reactions
+    The model edge has 17 species and 18 reactions
+
+
+Adding species HCO_ads(2) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    HCO_ads(2)
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 6 species and 0 reactions
+    The model edge has 16 species and 18 reactions
+
+
+Adding species CH4(3) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CH4(3)
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 7 species and 0 reactions
+    The model edge has 15 species and 18 reactions
+
+
+Adding species O2(4) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    O2(4)
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 8 species and 0 reactions
+    The model edge has 14 species and 18 reactions
+
+
+Initialization complete. Starting model generation.
+
+Generating initial reactions...
+Species with SMILES of [CH]=O named HCO based on thermo library name
+Species with SMILES of O=CC=O named glyoxal based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 4 new edge species
+    HCO(19)
+    [Pt]OC=[Pt](20)
+    C.[Pt](21)
+    glyoxal(22)
+Added 0 new core reactions
+Created 5 new edge reactions
+    HCO(19) + X(1) <=> HCO_ads(2)
+    HCO_ads(2) + X(1) <=> [Pt]OC=[Pt](20)
+    HCO_ads(2) + X(1) <=> HX(6) + OCX(15)
+    CH4(3) + X(1) <=> C.[Pt](21)
+    glyoxal(22) + X(1) + X(1) <=> HCO_ads(2) + HCO_ads(2)
+
+After model enlargement:
+    The model core has 8 species and 0 reactions
+    The model edge has 18 species and 23 reactions
+
+
+Completed initial enlarge edge step.
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 0 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 0 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 23 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 23 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:04
+    Memory used: 306.54 MB
+
+Beginning model generation stage 1...
+
+Conducting simulation of reaction system 1...
+At time 0.0000e+00 s, species HX(6) was added to model core to avoid singularity
+
+
+Adding species HX(6) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    HX(6)
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 9 species and 0 reactions
+    The model edge has 17 species and 23 reactions
+
+
+Species with SMILES of [H] named H based on thermo library name
+Species with SMILES of C=O named CH2O based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 2 new edge species
+    H(23)
+    CH2O(24)
+Added 0 new core reactions
+Created 2 new edge reactions
+    X(1) + H(23) <=> HX(6)
+    X(1) + X(1) + CH2O(24) <=> HX(6) + HCO_ads(2)
+
+After model enlargement:
+    The model core has 9 species and 0 reactions
+    The model edge has 19 species and 25 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 0 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 0 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 25 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 25 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:05
+    Memory used: 309.37 MB
+
+Conducting simulation of reaction system 1...
+At time 0.0000e+00 s, species OCX(15) was added to model core to avoid singularity
+
+
+Adding species OCX(15) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    OCX(15)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    HCO_ads(2) + X(1) <=> HX(6) + OCX(15)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 10 species and 1 reactions
+    The model edge has 18 species and 24 reactions
+
+
+Species with SMILES of O=CC(=O)[Pt] named OCHCOX based on thermo library name
+Species with SMILES of O=C([Pt])C(=O)[Pt] named OCCOX based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 3 new edge species
+    [Pt]OC#[Pt](25)
+    OCHCOX(26)
+    OCCOX(27)
+Added 0 new core reactions
+Created 3 new edge reactions
+    OCX(15) + X(1) <=> [Pt]OC#[Pt](25)
+    X(1) + OCHCOX(26) <=> OCX(15) + HCO_ads(2)
+    OCCOX(27) <=> OCX(15) + OCX(15)
+
+After model enlargement:
+    The model core has 10 species and 1 reactions
+    The model edge has 21 species and 27 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 1 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 1 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 28 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 28 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:06
+    Memory used: 313.63 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 2.1773e-29 s, species [Pt]OC=[Pt](20) at rate ratio 3692169.76293 was added to model core in model resurrection process
+
+
+Adding species [Pt]OC=[Pt](20) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    [Pt]OC=[Pt](20)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    HCO_ads(2) + X(1) <=> [Pt]OC=[Pt](20)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 11 species and 2 reactions
+    The model edge has 20 species and 26 reactions
+
+
+Species with SMILES of [Pt]O[Pt] named O(T)X based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 12 new edge species
+    [Pt]C=[Pt](28)
+    O(T)X(29)
+    [Pt]CO[Pt](30)
+    O=CC([Pt])O[Pt](31)
+    O=C([Pt])C([Pt])O[Pt](32)
+    O=C([Pt])C=[Pt](33)
+    O=C([Pt])O[Pt](34)
+    O=C([Pt])OC=[Pt](35)
+    [Pt]OC([Pt])C([Pt])O[Pt](36)
+    [Pt]OC([Pt])C=[Pt](37)
+    [Pt]OC([Pt])O[Pt](38)
+    [Pt]OC([Pt])OC=[Pt](39)
+Added 0 new core reactions
+Created 17 new edge reactions
+    [Pt]OC=[Pt](20) <=> OX(7) + CHX(18)
+    [Pt]OC=[Pt](20) + X(1) <=> OX(7) + [Pt]C=[Pt](28)
+    [Pt]OC=[Pt](20) + X(1) <=> CHX(18) + O(T)X(29)
+    [Pt]OC=[Pt](20) + X(1) <=> HX(6) + [Pt]OC#[Pt](25)
+    [Pt]OC=[Pt](20) + HCO_ads(2) <=> OCX(15) + [Pt]CO[Pt](30)
+    X(1) + O=CC([Pt])O[Pt](31) <=> [Pt]OC=[Pt](20) + HCO_ads(2)
+    X(1) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + HX(6)
+    O=C([Pt])C([Pt])O[Pt](32) <=> [Pt]OC=[Pt](20) + OCX(15)
+    OX(7) + O=C([Pt])C=[Pt](33) <=> [Pt]OC=[Pt](20) + OCX(15)
+    CHX(18) + O=C([Pt])O[Pt](34) <=> [Pt]OC=[Pt](20) + OCX(15)
+    HCO_ads(2) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + OCX(15)
+    X(1) + O=C([Pt])OC=[Pt](35) <=> [Pt]OC=[Pt](20) + OCX(15)
+    [Pt]OC([Pt])C([Pt])O[Pt](36) <=> [Pt]OC=[Pt](20) + [Pt]OC=[Pt](20)
+    OX(7) + [Pt]OC([Pt])C=[Pt](37) <=> [Pt]OC=[Pt](20) + [Pt]OC=[Pt](20)
+    [Pt]OC([Pt])O[Pt](38) + CHX(18) <=> [Pt]OC=[Pt](20) + [Pt]OC=[Pt](20)
+    [Pt]CO[Pt](30) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + [Pt]OC=[Pt](20)
+    [Pt]OC([Pt])OC=[Pt](39) + X(1) <=> [Pt]OC=[Pt](20) + [Pt]OC=[Pt](20)
+
+After model enlargement:
+    The model core has 11 species and 2 reactions
+    The model edge has 32 species and 43 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 2 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 2 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 45 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 45 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:07
+    Memory used: 314.33 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 2.2836e-29 s, species C.[Pt](21) at rate ratio 91028.2113365 was added to model core in model resurrection process
+
+
+Adding species C.[Pt](21) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    C.[Pt](21)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    CH4(3) + X(1) <=> C.[Pt](21)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 12 species and 3 reactions
+    The model edge has 31 species and 42 reactions
+
+
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 12 species and 3 reactions
+    The model edge has 31 species and 42 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 3 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 3 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 45 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 45 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:08
+    Memory used: 314.33 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 2.3852e-29 s, species OX(7) at rate ratio 62131.8202767 was added to model core in model resurrection process
+
+
+Adding species OX(7) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    OX(7)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    O2(4) + X(1) + X(1) <=> OX(7) + OX(7)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 13 species and 4 reactions
+    The model edge has 30 species and 41 reactions
+
+
+Species with SMILES of O=CO[Pt] named formyloxyX based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 3 new edge species
+    formyloxyX(40)
+    [Pt]OO[Pt](41)
+    [Pt]OOC=[Pt](42)
+Added 0 new core reactions
+Created 8 new edge reactions
+    OX(7) + HCO_ads(2) <=> HOX(9) + OCX(15)
+    formyloxyX(40) + X(1) <=> OX(7) + HCO_ads(2)
+    O=C([Pt])O[Pt](34) <=> OX(7) + OCX(15)
+    [Pt]OC([Pt])O[Pt](38) <=> [Pt]OC=[Pt](20) + OX(7)
+    [Pt]OO[Pt](41) + CHX(18) <=> [Pt]OC=[Pt](20) + OX(7)
+    HOX(9) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + OX(7)
+    [Pt]OOC=[Pt](42) + X(1) <=> [Pt]OC=[Pt](20) + OX(7)
+    [Pt]OO[Pt](41) <=> OX(7) + OX(7)
+
+After model enlargement:
+    The model core has 13 species and 4 reactions
+    The model edge has 33 species and 49 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 4 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 4 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 53 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 53 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:09
+    Memory used: 314.34 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 2.4825e-29 s, species CH3X(8) at rate ratio 0.0271458614638 was added to model core in model resurrection process
+
+
+Adding species CH3X(8) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CH3X(8)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    CH4(3) + X(1) + X(1) <=> HX(6) + CH3X(8)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 14 species and 5 reactions
+    The model edge has 32 species and 48 reactions
+
+
+Species with SMILES of [CH3] named CH3 based on thermo library name
+Species with SMILES of CC=O named CH3CHO based on thermo library name
+Species with SMILES of CC(=O)[Pt] named acetylX based on thermo library name
+Species with SMILES of CC named C2H6 based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 6 new edge species
+    CH3(43)
+    CH3CHO(44)
+    acetylX(45)
+    CC([Pt])O[Pt](46)
+    CO[Pt](47)
+    C2H6(48)
+Added 0 new core reactions
+Created 9 new edge reactions
+    CH3(43) + X(1) <=> CH3X(8)
+    CH3CHO(44) + X(1) + X(1) <=> CH3X(8) + HCO_ads(2)
+    CH2X(17) + HCO_ads(2) <=> CH3X(8) + OCX(15)
+    acetylX(45) + X(1) <=> CH3X(8) + OCX(15)
+    CH2X(17) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + CH3X(8)
+    CC([Pt])O[Pt](46) + X(1) <=> [Pt]OC=[Pt](20) + CH3X(8)
+    HOX(9) + CH2X(17) <=> CH3X(8) + OX(7)
+    CO[Pt](47) + X(1) <=> CH3X(8) + OX(7)
+    C2H6(48) + X(1) + X(1) <=> CH3X(8) + CH3X(8)
+
+After model enlargement:
+    The model core has 14 species and 5 reactions
+    The model edge has 38 species and 57 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 5 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 5 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 62 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 62 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:10
+    Memory used: 314.86 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 2.5763e-29 s, species HCO(19) at rate ratio 0.0153266295425 was added to model core in model resurrection process
+
+
+Adding species HCO(19) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    HCO(19)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    HCO(19) + X(1) <=> HCO_ads(2)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 15 species and 6 reactions
+    The model edge has 37 species and 56 reactions
+
+
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 15 species and 6 reactions
+    The model edge has 37 species and 56 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 6 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 6 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 62 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 62 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:11
+    Memory used: 314.86 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 2.6667e-29 s, species glyoxal(22) at rate ratio 7.90593494799e-06 was added to model core in model resurrection process
+
+
+Adding species glyoxal(22) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    glyoxal(22)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    glyoxal(22) + X(1) + X(1) <=> HCO_ads(2) + HCO_ads(2)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 16 species and 7 reactions
+    The model edge has 36 species and 55 reactions
+
+
+Species with SMILES of O=CC=O.[Pt] named glyoxalX based on thermo library name
+Generating kinetics for new reactions...
+For reaction glyoxal(22) + X(1) <=> glyoxalX(49), Ea raised from 0.0 to 29.3 kJ/mol to match endothermicity of reaction.
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 1 new edge species
+    glyoxalX(49)
+Added 0 new core reactions
+Created 2 new edge reactions
+    glyoxal(22) + X(1) + X(1) <=> HX(6) + OCHCOX(26)
+    glyoxal(22) + X(1) <=> glyoxalX(49)
+
+After model enlargement:
+    The model core has 16 species and 7 reactions
+    The model edge has 37 species and 57 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 7 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 7 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 64 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 64 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:13
+    Memory used: 315.21 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 2.7541e-29 s, species CO(14) at rate ratio 2.11037364122e-11 was added to model core in model resurrection process
+
+
+Adding species CO(14) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CO(14)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    CO(14) + X(1) <=> OCX(15)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 17 species and 8 reactions
+    The model edge has 36 species and 56 reactions
+
+
+Species with SMILES of [C-]#[O+].[Pt] named COX based on thermo library name
+Generating kinetics for new reactions...
+For reaction CO(14) + X(1) <=> COX(50), Ea raised from 0.0 to 26.4 kJ/mol to match endothermicity of reaction.
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 1 new edge species
+    COX(50)
+Added 0 new core reactions
+Created 1 new edge reactions
+    CO(14) + X(1) <=> COX(50)
+
+After model enlargement:
+    The model core has 17 species and 8 reactions
+    The model edge has 37 species and 57 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 8 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 8 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 65 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 65 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:15
+    Memory used: 315.49 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 2.8389e-29 s, species [Pt]CO[Pt](30) at rate ratio 3.39976986568e-12 was added to model core in model resurrection process
+
+
+Adding species [Pt]CO[Pt](30) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    [Pt]CO[Pt](30)
+Created 0 new edge species
+Moved 2 reactions from edge to core
+    [Pt]OC=[Pt](20) + HCO_ads(2) <=> OCX(15) + [Pt]CO[Pt](30)
+    X(1) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + HX(6)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 18 species and 10 reactions
+    The model edge has 36 species and 55 reactions
+
+
+Species with SMILES of [Pt]C[Pt] named CH2(T)X based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 9 new edge species
+    CH2(T)X(51)
+    O=C([Pt])C[Pt](52)
+    O=C([Pt])CO[Pt](53)
+    O=C([Pt])OC[Pt](54)
+    [Pt]CC([Pt])O[Pt](55)
+    [Pt]OCC([Pt])O[Pt](56)
+    [Pt]COC([Pt])O[Pt](57)
+    [Pt]OCO[Pt](58)
+    [Pt]COO[Pt](59)
+Added 0 new core reactions
+Created 15 new edge reactions
+    [Pt]CO[Pt](30) <=> OX(7) + CH2X(17)
+    X(1) + [Pt]CO[Pt](30) <=> CH2(T)X(51) + OX(7)
+    X(1) + [Pt]CO[Pt](30) <=> CH2X(17) + O(T)X(29)
+    O=C([Pt])C[Pt](52) + OX(7) <=> OCX(15) + [Pt]CO[Pt](30)
+    CH2X(17) + O=C([Pt])O[Pt](34) <=> OCX(15) + [Pt]CO[Pt](30)
+    O=C([Pt])CO[Pt](53) + X(1) <=> OCX(15) + [Pt]CO[Pt](30)
+    O=C([Pt])OC[Pt](54) + X(1) <=> OCX(15) + [Pt]CO[Pt](30)
+    [Pt]CC([Pt])O[Pt](55) + OX(7) <=> [Pt]OC=[Pt](20) + [Pt]CO[Pt](30)
+    [Pt]OC([Pt])O[Pt](38) + CH2X(17) <=> [Pt]OC=[Pt](20) + [Pt]CO[Pt](30)
+    [Pt]OCC([Pt])O[Pt](56) + X(1) <=> [Pt]OC=[Pt](20) + [Pt]CO[Pt](30)
+    [Pt]COC([Pt])O[Pt](57) + X(1) <=> [Pt]OC=[Pt](20) + [Pt]CO[Pt](30)
+    [Pt]OO[Pt](41) + CH2X(17) <=> OX(7) + [Pt]CO[Pt](30)
+    OX(7) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + HOX(9)
+    [Pt]OCO[Pt](58) + X(1) <=> OX(7) + [Pt]CO[Pt](30)
+    [Pt]COO[Pt](59) + X(1) <=> OX(7) + [Pt]CO[Pt](30)
+
+After model enlargement:
+    The model core has 18 species and 10 reactions
+    The model edge has 45 species and 70 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 10 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 10 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 80 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 80 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:17
+    Memory used: 315.91 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 2.9212e-29 s, species HOX(9) at rate ratio 5.88699617995e-14 was added to model core in model resurrection process
+
+
+Adding species HOX(9) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    HOX(9)
+Created 0 new edge species
+Moved 4 reactions from edge to core
+    OX(7) + CH4(3) + X(1) <=> CH3X(8) + HOX(9)
+    HX(6) + OX(7) <=> HOX(9) + X(1)
+    OX(7) + HCO_ads(2) <=> HOX(9) + OCX(15)
+    OX(7) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + HOX(9)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 19 species and 14 reactions
+    The model edge has 44 species and 66 reactions
+
+
+Species with SMILES of [OH] named OH(D) based on thermo library name
+Species with SMILES of O=CO named formic_acid based on thermo library name
+Species with SMILES of O=C(O)[Pt] named HOCOX based on thermo library name
+Species with SMILES of CO named CH3OH based on thermo library name
+Species with SMILES of OO named HOOH based on thermo library name
+Generating kinetics for new reactions...
+For reaction H2O(11) + X(1) + X(1) <=> HX(6) + HOX(9), Ea raised from 59.0 to 62.3 kJ/mol to match endothermicity of reaction.
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 7 new edge species
+    OH(D)(60)
+    formic_acid(61)
+    HOCOX(62)
+    OC([Pt])O[Pt](63)
+    OO[Pt](64)
+    CH3OH(65)
+    HOOH(66)
+Added 0 new core reactions
+Created 8 new edge reactions
+    OH(D)(60) + X(1) <=> HOX(9)
+    formic_acid(61) + X(1) + X(1) <=> HOX(9) + HCO_ads(2)
+    H2O(11) + X(1) + X(1) <=> HX(6) + HOX(9)
+    HOCOX(62) + X(1) <=> HOX(9) + OCX(15)
+    OC([Pt])O[Pt](63) + X(1) <=> [Pt]OC=[Pt](20) + HOX(9)
+    OO[Pt](64) + X(1) <=> OX(7) + HOX(9)
+    CH3OH(65) + X(1) + X(1) <=> CH3X(8) + HOX(9)
+    HOOH(66) + X(1) + X(1) <=> HOX(9) + HOX(9)
+
+After model enlargement:
+    The model core has 19 species and 14 reactions
+    The model edge has 51 species and 74 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 14 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 14 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 88 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 88 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:19
+    Memory used: 316.03 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.0013e-29 s, species CH2O(24) at rate ratio 5.05343234639e-15 was added to model core in model resurrection process
+
+
+Adding species CH2O(24) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CH2O(24)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    X(1) + X(1) + CH2O(24) <=> HX(6) + HCO_ads(2)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 20 species and 15 reactions
+    The model edge has 50 species and 73 reactions
+
+
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 1 new edge species
+    C=O.[Pt](67)
+Added 0 new core reactions
+Created 1 new edge reactions
+    X(1) + CH2O(24) <=> C=O.[Pt](67)
+
+After model enlargement:
+    The model core has 20 species and 15 reactions
+    The model edge has 51 species and 74 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 15 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 15 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 89 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 89 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:21
+    Memory used: 316.50 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.0792e-29 s, species CHX(18) at rate ratio 1.88386605892e-15 was added to model core in model resurrection process
+
+
+Adding species CHX(18) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CHX(18)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    [Pt]OC=[Pt](20) <=> OX(7) + CHX(18)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 21 species and 16 reactions
+    The model edge has 50 species and 73 reactions
+
+
+Species with SMILES of O=CC=[Pt] named ketene(T)X based on thermo library name
+Generating kinetics for new reactions...
+For reaction HOX(9) + CHX(18) <=> OX(7) + CH2X(17), Ea raised from 42.4 to 42.6 kJ/mol to match endothermicity of reaction.
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 8 new edge species
+    ketene(T)X(68)
+    [Pt]=CC=[Pt](69)
+    [Pt]=COC=[Pt](70)
+    CC=[Pt](71)
+    [Pt]CC=[Pt](72)
+    [Pt]OCC=[Pt](73)
+    [Pt]COC=[Pt](74)
+    OC=[Pt](75)
+Added 0 new core reactions
+Created 21 new edge reactions
+    CHX(18) + HCO_ads(2) <=> CH2X(17) + OCX(15)
+    ketene(T)X(68) + X(1) <=> CHX(18) + HCO_ads(2)
+    O=C([Pt])C=[Pt](33) <=> OCX(15) + CHX(18)
+    CX(16) + HCO_ads(2) <=> OCX(15) + CHX(18)
+    [Pt]OC([Pt])C=[Pt](37) <=> [Pt]OC=[Pt](20) + CHX(18)
+    CX(16) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + CHX(18)
+    [Pt]=CC=[Pt](69) + OX(7) <=> [Pt]OC=[Pt](20) + CHX(18)
+    CH2X(17) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + CHX(18)
+    [Pt]=COC=[Pt](70) + X(1) <=> [Pt]OC=[Pt](20) + CHX(18)
+    HOX(9) + CX(16) <=> OX(7) + CHX(18)
+    CH2X(17) + CH2X(17) <=> CH3X(8) + CHX(18)
+    CC=[Pt](71) + X(1) <=> CH3X(8) + CHX(18)
+    [Pt]CC=[Pt](72) + OX(7) <=> CHX(18) + [Pt]CO[Pt](30)
+    [Pt]OC=[Pt](20) + CH2X(17) <=> CHX(18) + [Pt]CO[Pt](30)
+    CHX(18) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + CH2X(17)
+    [Pt]OCC=[Pt](73) + X(1) <=> CHX(18) + [Pt]CO[Pt](30)
+    [Pt]COC=[Pt](74) + X(1) <=> CHX(18) + [Pt]CO[Pt](30)
+    HOX(9) + CHX(18) <=> OX(7) + CH2X(17)
+    OC=[Pt](75) + X(1) <=> HOX(9) + CHX(18)
+    [Pt]=CC=[Pt](69) <=> CHX(18) + CHX(18)
+    CX(16) + CH2X(17) <=> CHX(18) + CHX(18)
+
+After model enlargement:
+    The model core has 21 species and 16 reactions
+    The model edge has 58 species and 94 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 16 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 16 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 110 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 110 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:23
+    Memory used: 317.02 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.1553e-29 s, species H(23) at rate ratio 5.39579166794e-18 was added to model core in model resurrection process
+
+
+Adding species H(23) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    H(23)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    X(1) + H(23) <=> HX(6)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 22 species and 17 reactions
+    The model edge has 57 species and 93 reactions
+
+
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 22 species and 17 reactions
+    The model edge has 57 species and 93 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 17 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 17 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 110 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 110 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:26
+    Memory used: 317.10 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.2295e-29 s, species CX(16) at rate ratio 6.64192911104e-19 was added to model core in model resurrection process
+
+
+Adding species CX(16) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CX(16)
+Created 0 new edge species
+Moved 5 reactions from edge to core
+    OX(7) + CX(16) <=> OCX(15) + X(1)
+    CHX(18) + X(1) <=> HX(6) + CX(16)
+    CX(16) + HCO_ads(2) <=> OCX(15) + CHX(18)
+    CX(16) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + CHX(18)
+    HOX(9) + CX(16) <=> OX(7) + CHX(18)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 23 species and 22 reactions
+    The model edge has 56 species and 88 reactions
+
+
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 11 new edge species
+    O=CC#[Pt](76)
+    O=C([Pt])C#[Pt](77)
+    [Pt]OC([Pt])C#[Pt](78)
+    [Pt]=CC#[Pt](79)
+    [Pt]=COC#[Pt](80)
+    CC#[Pt](81)
+    [Pt]CC#[Pt](82)
+    [Pt]OCC#[Pt](83)
+    [Pt]COC#[Pt](84)
+    OC#[Pt](85)
+    [Pt]#CC#[Pt](86)
+Added 0 new core reactions
+Created 17 new edge reactions
+    O=CC#[Pt](76) + X(1) <=> CX(16) + HCO_ads(2)
+    O=C([Pt])C#[Pt](77) <=> CX(16) + OCX(15)
+    [Pt]OC([Pt])C#[Pt](78) <=> [Pt]OC=[Pt](20) + CX(16)
+    [Pt]=CC#[Pt](79) + OX(7) <=> [Pt]OC=[Pt](20) + CX(16)
+    CHX(18) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + CX(16)
+    [Pt]OC=[Pt](20) + CX(16) <=> CHX(18) + [Pt]OC#[Pt](25)
+    [Pt]=COC#[Pt](80) + X(1) <=> [Pt]OC=[Pt](20) + CX(16)
+    [Pt]OC#[Pt](25) <=> OX(7) + CX(16)
+    CH3X(8) + CX(16) <=> CH2X(17) + CHX(18)
+    CC#[Pt](81) + X(1) <=> CH3X(8) + CX(16)
+    [Pt]CC#[Pt](82) + OX(7) <=> CX(16) + [Pt]CO[Pt](30)
+    CH2X(17) + [Pt]OC#[Pt](25) <=> CX(16) + [Pt]CO[Pt](30)
+    [Pt]OCC#[Pt](83) + X(1) <=> CX(16) + [Pt]CO[Pt](30)
+    [Pt]COC#[Pt](84) + X(1) <=> CX(16) + [Pt]CO[Pt](30)
+    OC#[Pt](85) + X(1) <=> HOX(9) + CX(16)
+    [Pt]=CC#[Pt](79) <=> CX(16) + CHX(18)
+    [Pt]#CC#[Pt](86) <=> CX(16) + CX(16)
+
+After model enlargement:
+    The model core has 23 species and 22 reactions
+    The model edge has 67 species and 105 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 22 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 22 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 127 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 127 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:28
+    Memory used: 317.94 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.3021e-29 s, species CH2X(17) at rate ratio 6.70437478037e-20 was added to model core in model resurrection process
+
+
+Adding species CH2X(17) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CH2X(17)
+Created 0 new edge species
+Moved 13 reactions from edge to core
+    HX(6) + CH2X(17) <=> CH3X(8) + X(1)
+    HX(6) + CHX(18) <=> CH2X(17) + X(1)
+    CH2X(17) + HCO_ads(2) <=> CH3X(8) + OCX(15)
+    CH2X(17) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + CH3X(8)
+    HOX(9) + CH2X(17) <=> CH3X(8) + OX(7)
+    [Pt]CO[Pt](30) <=> OX(7) + CH2X(17)
+    CHX(18) + HCO_ads(2) <=> CH2X(17) + OCX(15)
+    CH2X(17) + CH2X(17) <=> CH3X(8) + CHX(18)
+    [Pt]OC=[Pt](20) + CH2X(17) <=> CHX(18) + [Pt]CO[Pt](30)
+    CHX(18) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + CH2X(17)
+    HOX(9) + CHX(18) <=> OX(7) + CH2X(17)
+    CX(16) + CH2X(17) <=> CHX(18) + CHX(18)
+    CH3X(8) + CX(16) <=> CH2X(17) + CHX(18)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 24 species and 35 reactions
+    The model edge has 66 species and 92 reactions
+
+
+Species with SMILES of O=CC[Pt] named vinoxyX based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 6 new edge species
+    vinoxyX(87)
+    CC[Pt](88)
+    [Pt]CC[Pt](89)
+    [Pt]CCO[Pt](90)
+    [Pt]COC[Pt](91)
+    OC[Pt](92)
+Added 2 new core reactions
+    [Pt]OC=[Pt](20) + CH2X(17) <=> CHX(18) + [Pt]CO[Pt](30)
+    [Pt]OC=[Pt](20) + CH2X(17) <=> CHX(18) + [Pt]CO[Pt](30)
+Created 14 new edge reactions
+    vinoxyX(87) + X(1) <=> CH2X(17) + HCO_ads(2)
+    O=C([Pt])C[Pt](52) <=> CH2X(17) + OCX(15)
+    [Pt]CC([Pt])O[Pt](55) <=> [Pt]OC=[Pt](20) + CH2X(17)
+    [Pt]CC=[Pt](72) + OX(7) <=> [Pt]OC=[Pt](20) + CH2X(17)
+    CH3X(8) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + CH2X(17)
+    [Pt]COC=[Pt](74) + X(1) <=> [Pt]OC=[Pt](20) + CH2X(17)
+    CC[Pt](88) + X(1) <=> CH3X(8) + CH2X(17)
+    CH2X(17) + [Pt]CO[Pt](30) <=> [Pt]CC[Pt](89) + OX(7)
+    [Pt]CCO[Pt](90) + X(1) <=> CH2X(17) + [Pt]CO[Pt](30)
+    [Pt]COC[Pt](91) + X(1) <=> CH2X(17) + [Pt]CO[Pt](30)
+    OC[Pt](92) + X(1) <=> HOX(9) + CH2X(17)
+    [Pt]CC=[Pt](72) <=> CH2X(17) + CHX(18)
+    [Pt]CC#[Pt](82) <=> CX(16) + CH2X(17)
+    [Pt]CC[Pt](89) <=> CH2X(17) + CH2X(17)
+
+After model enlargement:
+    The model core has 24 species and 37 reactions
+    The model edge has 72 species and 106 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 37 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 37 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 143 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 143 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:31
+    Memory used: 318.79 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.3731e-29 s, species OCHCOX(26) at rate ratio 1.55829414964e-20 was added to model core in model resurrection process
+
+
+Adding species OCHCOX(26) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    OCHCOX(26)
+Created 0 new edge species
+Moved 2 reactions from edge to core
+    X(1) + OCHCOX(26) <=> OCX(15) + HCO_ads(2)
+    glyoxal(22) + X(1) + X(1) <=> HX(6) + OCHCOX(26)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 25 species and 39 reactions
+    The model edge has 71 species and 104 reactions
+
+
+Species with SMILES of O=[C]C=O named OCHCO based on thermo library name
+Generating kinetics for new reactions...
+For reaction X(1) + OCHCOX(26) <=> O=CC(=[Pt])O[Pt](94), Ea raised from 307.9 to 308.2 kJ/mol to match endothermicity of reaction.
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 12 new edge species
+    OCHCO(93)
+    O=CC(=[Pt])O[Pt](94)
+    O=CC(=O)C=O(95)
+    O=CC(=O)C(=O)[Pt](96)
+    O=CC(=O)C([Pt])O[Pt](97)
+    O=CC(=O)O[Pt](98)
+    CC(=O)C=O(99)
+    O=CC(=O)O(100)
+    O=CC(=O)C=[Pt](101)
+    O=CC(=O)C#[Pt](102)
+    O=CC(=O)C[Pt](103)
+    O=CC(=O)C(=O)C=O(104)
+Added 0 new core reactions
+Created 17 new edge reactions
+    OCHCO(93) + X(1) <=> OCHCOX(26)
+    X(1) + OCHCOX(26) <=> O=CC(=[Pt])O[Pt](94)
+    O=CC(=O)C=O(95) + X(1) + X(1) <=> HCO_ads(2) + OCHCOX(26)
+    O=CC(=O)C(=O)[Pt](96) + X(1) <=> OCX(15) + OCHCOX(26)
+    OCX(15) + O=CC([Pt])O[Pt](31) <=> [Pt]OC=[Pt](20) + OCHCOX(26)
+    O=CC(=O)C([Pt])O[Pt](97) + X(1) <=> [Pt]OC=[Pt](20) + OCHCOX(26)
+    OX(7) + OCHCOX(26) <=> formyloxyX(40) + OCX(15)
+    O=CC(=O)O[Pt](98) + X(1) <=> OX(7) + OCHCOX(26)
+    CC(=O)C=O(99) + X(1) + X(1) <=> CH3X(8) + OCHCOX(26)
+    O=CC(=O)O(100) + X(1) + X(1) <=> HOX(9) + OCHCOX(26)
+    CHX(18) + OCHCOX(26) <=> ketene(T)X(68) + OCX(15)
+    O=CC(=O)C=[Pt](101) + X(1) <=> CHX(18) + OCHCOX(26)
+    CX(16) + OCHCOX(26) <=> O=CC#[Pt](76) + OCX(15)
+    O=CC(=O)C#[Pt](102) + X(1) <=> CX(16) + OCHCOX(26)
+    CH2X(17) + OCHCOX(26) <=> vinoxyX(87) + OCX(15)
+    O=CC(=O)C[Pt](103) + X(1) <=> CH2X(17) + OCHCOX(26)
+    O=CC(=O)C(=O)C=O(104) + X(1) + X(1) <=> OCHCOX(26) + OCHCOX(26)
+
+After model enlargement:
+    The model core has 25 species and 39 reactions
+    The model edge has 83 species and 121 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 39 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 39 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 160 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 160 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:36
+    Memory used: 321.52 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.4427e-29 s, species formyloxyX(40) at rate ratio 1.90619470875e-22 was added to model core in model resurrection process
+
+
+Adding species formyloxyX(40) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    formyloxyX(40)
+Created 0 new edge species
+Moved 2 reactions from edge to core
+    formyloxyX(40) + X(1) <=> OX(7) + HCO_ads(2)
+    OX(7) + OCHCOX(26) <=> formyloxyX(40) + OCX(15)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 26 species and 41 reactions
+    The model edge has 82 species and 119 reactions
+
+
+Species with SMILES of [O]C=O named formyloxy based on thermo library name
+Species with SMILES of O=COO[Pt] named formylperoxyX based on thermo library name
+Species with SMILES of COC=O named methyl_formate based on thermo library name
+Species with SMILES of O=COO named OCHOOH based on thermo library name
+Species with SMILES of O=COC[Pt] named CH2OCHOX based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 12 new edge species
+    formyloxy(105)
+    O=COC=O(106)
+    O=COC(=O)[Pt](107)
+    O=COC([Pt])O[Pt](108)
+    formylperoxyX(109)
+    methyl_formate(110)
+    OCHOOH(111)
+    O=COC=[Pt](112)
+    O=COC#[Pt](113)
+    CH2OCHOX(114)
+    O=COC(=O)C=O(115)
+    O=COOC=O(116)
+Added 0 new core reactions
+Created 17 new edge reactions
+    formyloxy(105) + X(1) <=> formyloxyX(40)
+    O=COC=O(106) + X(1) + X(1) <=> formyloxyX(40) + HCO_ads(2)
+    formic_acid(61) + X(1) + X(1) <=> formyloxyX(40) + HX(6)
+    O=COC(=O)[Pt](107) + X(1) <=> formyloxyX(40) + OCX(15)
+    OX(7) + O=CC([Pt])O[Pt](31) <=> formyloxyX(40) + [Pt]OC=[Pt](20)
+    O=COC([Pt])O[Pt](108) + X(1) <=> formyloxyX(40) + [Pt]OC=[Pt](20)
+    formylperoxyX(109) + X(1) <=> formyloxyX(40) + OX(7)
+    methyl_formate(110) + X(1) + X(1) <=> formyloxyX(40) + CH3X(8)
+    OCHOOH(111) + X(1) + X(1) <=> formyloxyX(40) + HOX(9)
+    formyloxyX(40) + CHX(18) <=> ketene(T)X(68) + OX(7)
+    O=COC=[Pt](112) + X(1) <=> formyloxyX(40) + CHX(18)
+    formyloxyX(40) + CX(16) <=> O=CC#[Pt](76) + OX(7)
+    O=COC#[Pt](113) + X(1) <=> formyloxyX(40) + CX(16)
+    formyloxyX(40) + CH2X(17) <=> vinoxyX(87) + OX(7)
+    CH2OCHOX(114) + X(1) <=> formyloxyX(40) + CH2X(17)
+    O=COC(=O)C=O(115) + X(1) + X(1) <=> formyloxyX(40) + OCHCOX(26)
+    O=COOC=O(116) + X(1) + X(1) <=> formyloxyX(40) + formyloxyX(40)
+
+After model enlargement:
+    The model core has 26 species and 41 reactions
+    The model edge has 94 species and 136 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 41 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 41 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 177 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 177 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:42
+    Memory used: 322.19 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.5109e-29 s, species H2(5) at rate ratio 5.87723982955e-23 was added to model core in model resurrection process
+
+
+Adding species H2(5) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    H2(5)
+Created 0 new edge species
+Moved 2 reactions from edge to core
+    H2(5) + X(1) + X(1) <=> HX(6) + HX(6)
+    H2(5) + CX(16) <=> CH2X(17)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 27 species and 43 reactions
+    The model edge has 93 species and 134 reactions
+
+
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 1 new edge species
+    [H][H].[Pt](117)
+Added 0 new core reactions
+Created 1 new edge reactions
+    H2(5) + X(1) <=> [H][H].[Pt](117)
+
+After model enlargement:
+    The model core has 27 species and 43 reactions
+    The model edge has 94 species and 135 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 43 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 43 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 178 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 178 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:45
+    Memory used: 322.33 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.5777e-29 s, species CH3CHO(44) at rate ratio 3.91824045843e-27 was added to model core in model resurrection process
+
+
+Adding species CH3CHO(44) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CH3CHO(44)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    CH3CHO(44) + X(1) + X(1) <=> CH3X(8) + HCO_ads(2)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 28 species and 44 reactions
+    The model edge has 93 species and 134 reactions
+
+
+Species with SMILES of CC=O.[Pt] named CH3CHOX based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 1 new edge species
+    CH3CHOX(118)
+Added 0 new core reactions
+Created 3 new edge reactions
+    CH3CHO(44) + X(1) + X(1) <=> vinoxyX(87) + HX(6)
+    CH3CHO(44) + X(1) + X(1) <=> acetylX(45) + HX(6)
+    CH3CHO(44) + X(1) <=> CH3CHOX(118)
+
+After model enlargement:
+    The model core has 28 species and 44 reactions
+    The model edge has 94 species and 137 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 44 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 44 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 181 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 181 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:49
+    Memory used: 322.33 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.6434e-29 s, species CH3(43) at rate ratio 9.72211159924e-28 was added to model core in model resurrection process
+
+
+Adding species CH3(43) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CH3(43)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    CH3(43) + X(1) <=> CH3X(8)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 29 species and 45 reactions
+    The model edge has 93 species and 136 reactions
+
+
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 29 species and 45 reactions
+    The model edge has 93 species and 136 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 45 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 45 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 181 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 181 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:52
+    Memory used: 322.33 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.7079e-29 s, species glyoxalX(49) at rate ratio 4.20045617683e-31 was added to model core in model resurrection process
+
+
+Adding species glyoxalX(49) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    glyoxalX(49)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    glyoxal(22) + X(1) <=> glyoxalX(49)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 30 species and 46 reactions
+    The model edge has 92 species and 135 reactions
+
+
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 30 species and 46 reactions
+    The model edge has 92 species and 135 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 46 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 46 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 181 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 181 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:00:57
+    Memory used: 322.33 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.7713e-29 s, species formic_acid(61) at rate ratio 2.28442042712e-32 was added to model core in model resurrection process
+
+
+Adding species formic_acid(61) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    formic_acid(61)
+Created 0 new edge species
+Moved 2 reactions from edge to core
+    formic_acid(61) + X(1) + X(1) <=> HOX(9) + HCO_ads(2)
+    formic_acid(61) + X(1) + X(1) <=> formyloxyX(40) + HX(6)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 31 species and 48 reactions
+    The model edge has 91 species and 133 reactions
+
+
+Species with SMILES of O=CO.[Pt] named formic_acidX based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 1 new edge species
+    formic_acidX(119)
+Added 0 new core reactions
+Created 2 new edge reactions
+    formic_acid(61) + X(1) + X(1) <=> HOCOX(62) + HX(6)
+    formic_acid(61) + X(1) <=> formic_acidX(119)
+
+After model enlargement:
+    The model core has 31 species and 48 reactions
+    The model edge has 92 species and 135 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 48 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 48 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 183 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 183 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:01:02
+    Memory used: 322.38 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.8336e-29 s, species CO2X(13) at rate ratio 3.46733724834e-34 was added to model core in model resurrection process
+
+
+Adding species CO2X(13) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    CO2X(13)
+Created 0 new edge species
+Moved 2 reactions from edge to core
+    OX(7) + OCX(15) <=> CO2X(13) + X(1)
+    HX(6) + CO2X(13) <=> HOX(9) + OCX(15)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 32 species and 50 reactions
+    The model edge has 91 species and 133 reactions
+
+
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 32 species and 50 reactions
+    The model edge has 91 species and 133 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 50 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 50 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 183 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 183 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:01:08
+    Memory used: 322.38 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.8949e-29 s, species O(T)X(29) at rate ratio 1.45110911035e-34 was added to model core in model resurrection process
+
+
+Adding species O(T)X(29) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    O(T)X(29)
+Created 0 new edge species
+Moved 2 reactions from edge to core
+    [Pt]OC=[Pt](20) + X(1) <=> CHX(18) + O(T)X(29)
+    X(1) + [Pt]CO[Pt](30) <=> CH2X(17) + O(T)X(29)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 33 species and 52 reactions
+    The model edge has 90 species and 131 reactions
+
+
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 4 new edge reactions
+    X(1) + O=C([Pt])O[Pt](34) <=> OCX(15) + O(T)X(29)
+    [Pt]OC([Pt])O[Pt](38) + X(1) <=> [Pt]OC=[Pt](20) + O(T)X(29)
+    [Pt]OO[Pt](41) + X(1) <=> OX(7) + O(T)X(29)
+    X(1) + [Pt]OC#[Pt](25) <=> CX(16) + O(T)X(29)
+
+After model enlargement:
+    The model core has 33 species and 52 reactions
+    The model edge has 90 species and 135 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 52 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 52 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 187 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 187 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:01:13
+    Memory used: 322.38 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 3.9553e-29 s, species O=CC([Pt])O[Pt](31) at rate ratio 4.85046377777e-35 was added to model core in model resurrection process
+
+
+Adding species O=CC([Pt])O[Pt](31) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    O=CC([Pt])O[Pt](31)
+Created 0 new edge species
+Moved 3 reactions from edge to core
+    X(1) + O=CC([Pt])O[Pt](31) <=> [Pt]OC=[Pt](20) + HCO_ads(2)
+    OCX(15) + O=CC([Pt])O[Pt](31) <=> [Pt]OC=[Pt](20) + OCHCOX(26)
+    OX(7) + O=CC([Pt])O[Pt](31) <=> formyloxyX(40) + [Pt]OC=[Pt](20)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 34 species and 55 reactions
+    The model edge has 89 species and 132 reactions
+
+
+Species with SMILES of O=CC([Pt])[Pt] named ketene(T)X based on thermo library name
+Species with SMILES of O=CC([Pt])C[Pt] named acrolein(T)X based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 18 new edge species
+    ketene(T)X(120)
+    O=CC([Pt])C(=O)[Pt](121)
+    O=CC(O[Pt])C(=O)[Pt](122)
+    O=CC([Pt])OC(=O)[Pt](123)
+    O=CC([Pt])C([Pt])O[Pt](124)
+    O=CC(O[Pt])C([Pt])O[Pt](125)
+    O=CC([Pt])OC([Pt])O[Pt](126)
+    O=CC(O[Pt])O[Pt](127)
+    O=CC([Pt])OO[Pt](128)
+    O=CC([Pt])C=[Pt](129)
+    O=CC(C=[Pt])O[Pt](130)
+    O=CC([Pt])OC=[Pt](131)
+    O=CC([Pt])C#[Pt](132)
+    O=CC(C#[Pt])O[Pt](133)
+    O=CC([Pt])OC#[Pt](134)
+    acrolein(T)X(135)
+    O=CC(C[Pt])O[Pt](136)
+    O=CC([Pt])OC[Pt](137)
+Added 0 new core reactions
+Created 36 new edge reactions
+    O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + OX(7)
+    X(1) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(120) + OX(7)
+    X(1) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + O(T)X(29)
+    X(1) + O=CC([Pt])O[Pt](31) <=> O=CC(=[Pt])O[Pt](94) + HX(6)
+    O=CC([Pt])C(=O)[Pt](121) + OX(7) <=> OCX(15) + O=CC([Pt])O[Pt](31)
+    OCX(15) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + O=C([Pt])O[Pt](34)
+    O=CC(=[Pt])O[Pt](94) + HCO_ads(2) <=> OCX(15) + O=CC([Pt])O[Pt](31)
+    O=CC(O[Pt])C(=O)[Pt](122) + X(1) <=> OCX(15) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])OC(=O)[Pt](123) + X(1) <=> OCX(15) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])C([Pt])O[Pt](124) + OX(7) <=> [Pt]OC=[Pt](20) + O=CC([Pt])O[Pt](31)
+    [Pt]OC([Pt])O[Pt](38) + ketene(T)X(68) <=> [Pt]OC=[Pt](20) + O=CC([Pt])O[Pt](31)
+    O=CC(=[Pt])O[Pt](94) + [Pt]CO[Pt](30) <=> [Pt]OC=[Pt](20) + O=CC([Pt])O[Pt](31)
+    O=CC(O[Pt])C([Pt])O[Pt](125) + X(1) <=> [Pt]OC=[Pt](20) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])OC([Pt])O[Pt](126) + X(1) <=> [Pt]OC=[Pt](20) + O=CC([Pt])O[Pt](31)
+    OX(7) + O=CC([Pt])O[Pt](31) <=> [Pt]OO[Pt](41) + ketene(T)X(68)
+    O=CC(=[Pt])O[Pt](94) + HOX(9) <=> OX(7) + O=CC([Pt])O[Pt](31)
+    O=CC(O[Pt])O[Pt](127) + X(1) <=> OX(7) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])OO[Pt](128) + X(1) <=> OX(7) + O=CC([Pt])O[Pt](31)
+    CHX(18) + O=CC([Pt])O[Pt](31) <=> O=CC([Pt])C=[Pt](129) + OX(7)
+    CHX(18) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + [Pt]OC=[Pt](20)
+    CHX(18) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + [Pt]OC=[Pt](20)
+    O=CC(=[Pt])O[Pt](94) + CH2X(17) <=> CHX(18) + O=CC([Pt])O[Pt](31)
+    O=CC(C=[Pt])O[Pt](130) + X(1) <=> CHX(18) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])OC=[Pt](131) + X(1) <=> CHX(18) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])C#[Pt](132) + OX(7) <=> CX(16) + O=CC([Pt])O[Pt](31)
+    ketene(T)X(68) + [Pt]OC#[Pt](25) <=> CX(16) + O=CC([Pt])O[Pt](31)
+    CX(16) + O=CC([Pt])O[Pt](31) <=> O=CC#[Pt](76) + [Pt]OC=[Pt](20)
+    CX(16) + O=CC([Pt])O[Pt](31) <=> O=CC(=[Pt])O[Pt](94) + CHX(18)
+    O=CC(C#[Pt])O[Pt](133) + X(1) <=> CX(16) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])OC#[Pt](134) + X(1) <=> CX(16) + O=CC([Pt])O[Pt](31)
+    CH2X(17) + O=CC([Pt])O[Pt](31) <=> acrolein(T)X(135) + OX(7)
+    CH2X(17) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + [Pt]CO[Pt](30)
+    CH2X(17) + O=CC([Pt])O[Pt](31) <=> vinoxyX(87) + [Pt]OC=[Pt](20)
+    O=CC(=[Pt])O[Pt](94) + CH3X(8) <=> CH2X(17) + O=CC([Pt])O[Pt](31)
+    O=CC(C[Pt])O[Pt](136) + X(1) <=> CH2X(17) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])OC[Pt](137) + X(1) <=> CH2X(17) + O=CC([Pt])O[Pt](31)
+
+After model enlargement:
+    The model core has 34 species and 55 reactions
+    The model edge has 107 species and 168 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 55 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 55 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 223 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 223 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:01:22
+    Memory used: 326.43 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 4.0148e-29 s, species COX(50) at rate ratio 3.71701933949e-36 was added to model core in model resurrection process
+
+
+Adding species COX(50) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    COX(50)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    CO(14) + X(1) <=> COX(50)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 35 species and 56 reactions
+    The model edge has 106 species and 167 reactions
+
+
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 35 species and 56 reactions
+    The model edge has 106 species and 167 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 56 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 56 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 223 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 223 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:01:28
+    Memory used: 328.22 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 4.0734e-29 s, species H2OX(10) at rate ratio 2.94093782012e-36 was added to model core in model resurrection process
+
+
+Adding species H2OX(10) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    H2OX(10)
+Created 0 new edge species
+Moved 3 reactions from edge to core
+    HOX(9) + CH4(3) + X(1) <=> CH3X(8) + H2OX(10)
+    OX(7) + H2OX(10) <=> HOX(9) + HOX(9)
+    HX(6) + HOX(9) <=> H2OX(10) + X(1)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 36 species and 59 reactions
+    The model edge has 105 species and 164 reactions
+
+
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 36 species and 59 reactions
+    The model edge has 105 species and 164 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 59 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 59 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 223 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 223 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:01:34
+    Memory used: 328.59 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 4.1312e-29 s, species C=O.[Pt](67) at rate ratio 2.86159596804e-38 was added to model core in model resurrection process
+
+
+Adding species C=O.[Pt](67) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    C=O.[Pt](67)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    X(1) + CH2O(24) <=> C=O.[Pt](67)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 37 species and 60 reactions
+    The model edge has 104 species and 163 reactions
+
+
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 37 species and 60 reactions
+    The model edge has 104 species and 163 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 60 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 60 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 223 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 223 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:01:40
+    Memory used: 329.65 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 4.1882e-29 s, species OH(D)(60) at rate ratio 9.29331705441e-39 was added to model core in model resurrection process
+
+
+Adding species OH(D)(60) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    OH(D)(60)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    OH(D)(60) + X(1) <=> HOX(9)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 38 species and 61 reactions
+    The model edge has 103 species and 162 reactions
+
+
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 0 new edge species
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 38 species and 61 reactions
+    The model edge has 103 species and 162 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 61 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 61 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 223 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 223 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:01:46
+    Memory used: 331.42 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 4.2444e-29 s, species O=COC=O(106) at rate ratio 2.88850101489e-42 was added to model core in model resurrection process
+
+
+Adding species O=COC=O(106) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    O=COC=O(106)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    O=COC=O(106) + X(1) + X(1) <=> formyloxyX(40) + HCO_ads(2)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 39 species and 62 reactions
+    The model edge has 102 species and 161 reactions
+
+
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 1 new edge species
+    O=COC=O.[Pt](138)
+Added 0 new core reactions
+Created 2 new edge reactions
+    O=COC=O(106) + X(1) + X(1) <=> O=COC(=O)[Pt](107) + HX(6)
+    O=COC=O(106) + X(1) <=> O=COC=O.[Pt](138)
+
+After model enlargement:
+    The model core has 39 species and 62 reactions
+    The model edge has 103 species and 163 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 62 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 62 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 225 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 225 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:01:58
+    Memory used: 339.08 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 4.2999e-29 s, species [Pt]OC#[Pt](25) at rate ratio 2.33412237961e-42 was added to model core in model resurrection process
+
+
+Adding species [Pt]OC#[Pt](25) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    [Pt]OC#[Pt](25)
+Created 0 new edge species
+Moved 12 reactions from edge to core
+    OCX(15) + X(1) <=> [Pt]OC#[Pt](25)
+    [Pt]OC=[Pt](20) + X(1) <=> HX(6) + [Pt]OC#[Pt](25)
+    HCO_ads(2) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + OCX(15)
+    [Pt]CO[Pt](30) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + [Pt]OC=[Pt](20)
+    HOX(9) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + OX(7)
+    CH2X(17) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + CHX(18)
+    CHX(18) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + CX(16)
+    [Pt]OC=[Pt](20) + CX(16) <=> CHX(18) + [Pt]OC#[Pt](25)
+    [Pt]OC#[Pt](25) <=> OX(7) + CX(16)
+    CH2X(17) + [Pt]OC#[Pt](25) <=> CX(16) + [Pt]CO[Pt](30)
+    CH3X(8) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + CH2X(17)
+    X(1) + [Pt]OC#[Pt](25) <=> CX(16) + O(T)X(29)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 40 species and 74 reactions
+    The model edge has 102 species and 151 reactions
+
+
+Species with SMILES of [Pt]C#[Pt] named C(T)X based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 23 new edge species
+    C(T)X(139)
+    O=C([Pt])C(=[Pt])O[Pt](140)
+    O=C([Pt])OC#[Pt](141)
+    [Pt]OC(=[Pt])C([Pt])O[Pt](142)
+    [Pt]OC(=[Pt])C=[Pt](143)
+    [Pt]OC(=[Pt])O[Pt](144)
+    [Pt]OC([Pt])OC#[Pt](145)
+    [Pt]OC(=[Pt])OC=[Pt](146)
+    [Pt]OOC#[Pt](147)
+    CC(=[Pt])O[Pt](148)
+    [Pt]CC(=[Pt])O[Pt](149)
+    [Pt]OCC(=[Pt])O[Pt](150)
+    [Pt]COC(=[Pt])O[Pt](151)
+    OC(=[Pt])O[Pt](152)
+    [Pt]OC(=[Pt])C#[Pt](153)
+    [Pt]#COC#[Pt](154)
+    O=CC(=O)C(=[Pt])O[Pt](155)
+    O=COC(=[Pt])O[Pt](156)
+    O=CC([Pt])C(=[Pt])O[Pt](157)
+    O=CC(O[Pt])C(=[Pt])O[Pt](158)
+    O=CC([Pt])OC(=[Pt])O[Pt](159)
+    [Pt]OC(=[Pt])C(=[Pt])O[Pt](160)
+    [Pt]OC(=[Pt])OC#[Pt](161)
+Added 2 new core reactions
+    CHX(18) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + CX(16)
+    CHX(18) + [Pt]OC#[Pt](25) <=> [Pt]OC=[Pt](20) + CX(16)
+Created 46 new edge reactions
+    X(1) + [Pt]OC#[Pt](25) <=> C(T)X(139) + OX(7)
+    O=CC(=[Pt])O[Pt](94) + X(1) <=> HCO_ads(2) + [Pt]OC#[Pt](25)
+    O=C([Pt])C(=[Pt])O[Pt](140) <=> OCX(15) + [Pt]OC#[Pt](25)
+    O=C([Pt])C#[Pt](77) + OX(7) <=> OCX(15) + [Pt]OC#[Pt](25)
+    OCX(15) + [Pt]OC#[Pt](25) <=> CX(16) + O=C([Pt])O[Pt](34)
+    O=C([Pt])OC#[Pt](141) + X(1) <=> OCX(15) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])C([Pt])O[Pt](142) <=> [Pt]OC=[Pt](20) + [Pt]OC#[Pt](25)
+    [Pt]OC([Pt])C#[Pt](78) + OX(7) <=> [Pt]OC=[Pt](20) + [Pt]OC#[Pt](25)
+    [Pt]OC([Pt])O[Pt](38) + CX(16) <=> [Pt]OC=[Pt](20) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])C=[Pt](143) + OX(7) <=> [Pt]OC=[Pt](20) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])O[Pt](144) + CHX(18) <=> [Pt]OC=[Pt](20) + [Pt]OC#[Pt](25)
+    [Pt]OC([Pt])OC#[Pt](145) + X(1) <=> [Pt]OC=[Pt](20) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])OC=[Pt](146) + X(1) <=> [Pt]OC=[Pt](20) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])O[Pt](144) <=> OX(7) + [Pt]OC#[Pt](25)
+    OX(7) + [Pt]OC#[Pt](25) <=> [Pt]OO[Pt](41) + CX(16)
+    [Pt]OOC#[Pt](147) + X(1) <=> OX(7) + [Pt]OC#[Pt](25)
+    CC(=[Pt])O[Pt](148) + X(1) <=> CH3X(8) + [Pt]OC#[Pt](25)
+    [Pt]CC(=[Pt])O[Pt](149) + OX(7) <=> [Pt]CO[Pt](30) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])O[Pt](144) + CH2X(17) <=> [Pt]CO[Pt](30) + [Pt]OC#[Pt](25)
+    [Pt]OCC(=[Pt])O[Pt](150) + X(1) <=> [Pt]CO[Pt](30) + [Pt]OC#[Pt](25)
+    [Pt]COC(=[Pt])O[Pt](151) + X(1) <=> [Pt]CO[Pt](30) + [Pt]OC#[Pt](25)
+    OC(=[Pt])O[Pt](152) + X(1) <=> HOX(9) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])C=[Pt](143) <=> CHX(18) + [Pt]OC#[Pt](25)
+    [Pt]=CC#[Pt](79) + OX(7) <=> CHX(18) + [Pt]OC#[Pt](25)
+    [Pt]=COC#[Pt](80) + X(1) <=> CHX(18) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])C#[Pt](153) <=> CX(16) + [Pt]OC#[Pt](25)
+    [Pt]#CC#[Pt](86) + OX(7) <=> CX(16) + [Pt]OC#[Pt](25)
+    [Pt]#COC#[Pt](154) + X(1) <=> CX(16) + [Pt]OC#[Pt](25)
+    [Pt]CC(=[Pt])O[Pt](149) <=> CH2X(17) + [Pt]OC#[Pt](25)
+    [Pt]CC#[Pt](82) + OX(7) <=> CH2X(17) + [Pt]OC#[Pt](25)
+    [Pt]COC#[Pt](84) + X(1) <=> CH2X(17) + [Pt]OC#[Pt](25)
+    OCHCOX(26) + [Pt]OC#[Pt](25) <=> O=CC(=[Pt])O[Pt](94) + OCX(15)
+    O=CC(=O)C(=[Pt])O[Pt](155) + X(1) <=> OCHCOX(26) + [Pt]OC#[Pt](25)
+    formyloxyX(40) + [Pt]OC#[Pt](25) <=> O=CC(=[Pt])O[Pt](94) + OX(7)
+    O=COC(=[Pt])O[Pt](156) + X(1) <=> formyloxyX(40) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])O[Pt](144) + X(1) <=> O(T)X(29) + [Pt]OC#[Pt](25)
+    O=CC([Pt])O[Pt](31) + [Pt]OC#[Pt](25) <=> O=CC([Pt])C(=[Pt])O[Pt](157) + OX(7)
+    O=CC([Pt])O[Pt](31) + [Pt]OC#[Pt](25) <=> [Pt]OC(=[Pt])O[Pt](144) + ketene(T)X(68)
+    O=CC(=[Pt])O[Pt](94) + [Pt]OC=[Pt](20) <=> O=CC([Pt])O[Pt](31) + [Pt]OC#[Pt](25)
+    O=CC([Pt])O[Pt](31) + [Pt]OC#[Pt](25) <=> O=CC(=[Pt])O[Pt](94) + [Pt]OC=[Pt](20)
+    O=CC(O[Pt])C(=[Pt])O[Pt](158) + X(1) <=> O=CC([Pt])O[Pt](31) + [Pt]OC#[Pt](25)
+    O=CC([Pt])OC(=[Pt])O[Pt](159) + X(1) <=> O=CC([Pt])O[Pt](31) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])C(=[Pt])O[Pt](160) <=> [Pt]OC#[Pt](25) + [Pt]OC#[Pt](25)
+    [Pt]OC(=[Pt])C#[Pt](153) + OX(7) <=> [Pt]OC#[Pt](25) + [Pt]OC#[Pt](25)
+    [Pt]OC#[Pt](25) + [Pt]OC#[Pt](25) <=> [Pt]OC(=[Pt])O[Pt](144) + CX(16)
+    [Pt]OC(=[Pt])OC#[Pt](161) + X(1) <=> [Pt]OC#[Pt](25) + [Pt]OC#[Pt](25)
+
+After model enlargement:
+    The model core has 40 species and 76 reactions
+    The model edge has 125 species and 197 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 76 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 76 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 273 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 273 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:02:09
+    Memory used: 344.74 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 4.3547e-29 s, species ketene(T)X(68) at rate ratio 9.17280819873e-43 was added to model core in model resurrection process
+
+
+Adding species ketene(T)X(68) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    ketene(T)X(68)
+Created 0 new edge species
+Moved 9 reactions from edge to core
+    ketene(T)X(68) + X(1) <=> CHX(18) + HCO_ads(2)
+    CHX(18) + OCHCOX(26) <=> ketene(T)X(68) + OCX(15)
+    formyloxyX(40) + CHX(18) <=> ketene(T)X(68) + OX(7)
+    O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + OX(7)
+    X(1) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + O(T)X(29)
+    CHX(18) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + [Pt]OC=[Pt](20)
+    CHX(18) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + [Pt]OC=[Pt](20)
+    ketene(T)X(68) + [Pt]OC#[Pt](25) <=> CX(16) + O=CC([Pt])O[Pt](31)
+    CH2X(17) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + [Pt]CO[Pt](30)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 41 species and 85 reactions
+    The model edge has 124 species and 188 reactions
+
+
+Species with SMILES of CC([Pt])C=O named CH3CHCHOX based on thermo library name
+Generating kinetics for new reactions...
+For reaction O=CC#[Pt](76) + CHX(18) <=> ketene(T)X(68) + CX(16), Ea raised from 119.2 to 120.4 kJ/mol to match endothermicity of reaction.
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 9 new edge species
+    O=CC([Pt])C=O(162)
+    CH3CHCHOX(163)
+    O=CC([Pt])CO[Pt](164)
+    O=CC(O)[Pt](165)
+    O=CC(=O)C([Pt])C=O(166)
+    O=COC([Pt])C=O(167)
+    O=CC([Pt])C([Pt])C=O(168)
+    O=CC([Pt])C(C=O)O[Pt](169)
+    O=CC([Pt])OC([Pt])C=O(170)
+Added 2 new core reactions
+    CHX(18) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + [Pt]OC=[Pt](20)
+    CHX(18) + O=CC([Pt])O[Pt](31) <=> ketene(T)X(68) + [Pt]OC=[Pt](20)
+Created 47 new edge reactions
+    ketene(T)X(68) + X(1) <=> O=CC#[Pt](76) + HX(6)
+    ketene(T)X(68) + HCO_ads(2) <=> vinoxyX(87) + OCX(15)
+    O=CC([Pt])C=O(162) + X(1) <=> ketene(T)X(68) + HCO_ads(2)
+    vinoxyX(87) + X(1) <=> ketene(T)X(68) + HX(6)
+    O=CC([Pt])C(=O)[Pt](121) <=> ketene(T)X(68) + OCX(15)
+    O=CC#[Pt](76) + HCO_ads(2) <=> ketene(T)X(68) + OCX(15)
+    O=CC([Pt])C([Pt])O[Pt](124) <=> ketene(T)X(68) + [Pt]OC=[Pt](20)
+    ketene(T)X(68) + [Pt]OC=[Pt](20) <=> O=CC#[Pt](76) + [Pt]CO[Pt](30)
+    O=CC([Pt])C=[Pt](129) + OX(7) <=> ketene(T)X(68) + [Pt]OC=[Pt](20)
+    vinoxyX(87) + [Pt]OC#[Pt](25) <=> ketene(T)X(68) + [Pt]OC=[Pt](20)
+    O=CC([Pt])OC=[Pt](131) + X(1) <=> ketene(T)X(68) + [Pt]OC=[Pt](20)
+    ketene(T)X(68) + OX(7) <=> O=CC#[Pt](76) + HOX(9)
+    vinoxyX(87) + CH2X(17) <=> ketene(T)X(68) + CH3X(8)
+    CH3CHCHOX(163) + X(1) <=> ketene(T)X(68) + CH3X(8)
+    acrolein(T)X(135) + OX(7) <=> ketene(T)X(68) + [Pt]CO[Pt](30)
+    vinoxyX(87) + [Pt]OC=[Pt](20) <=> ketene(T)X(68) + [Pt]CO[Pt](30)
+    O=CC([Pt])CO[Pt](164) + X(1) <=> ketene(T)X(68) + [Pt]CO[Pt](30)
+    O=CC([Pt])OC[Pt](137) + X(1) <=> ketene(T)X(68) + [Pt]CO[Pt](30)
+    vinoxyX(87) + OX(7) <=> ketene(T)X(68) + HOX(9)
+    O=CC(O)[Pt](165) + X(1) <=> ketene(T)X(68) + HOX(9)
+    O=CC([Pt])C=[Pt](129) <=> ketene(T)X(68) + CHX(18)
+    ketene(T)X(68) + CHX(18) <=> O=CC#[Pt](76) + CH2X(17)
+    vinoxyX(87) + CX(16) <=> ketene(T)X(68) + CHX(18)
+    O=CC([Pt])C#[Pt](132) <=> ketene(T)X(68) + CX(16)
+    O=CC#[Pt](76) + CHX(18) <=> ketene(T)X(68) + CX(16)
+    ketene(T)X(68) + CX(16) <=> O=CC#[Pt](76) + CHX(18)
+    acrolein(T)X(135) <=> ketene(T)X(68) + CH2X(17)
+    vinoxyX(87) + CHX(18) <=> ketene(T)X(68) + CH2X(17)
+    ketene(T)X(68) + CH2X(17) <=> O=CC#[Pt](76) + CH3X(8)
+    ketene(T)X(68) + CH2X(17) <=> vinoxyX(87) + CHX(18)
+    ketene(T)X(68) + OCHCOX(26) <=> O=CC([Pt])C=O(162) + OCX(15)
+    O=CC(=O)C([Pt])C=O(166) + X(1) <=> ketene(T)X(68) + OCHCOX(26)
+    O=CC([Pt])C=O(162) + OX(7) <=> ketene(T)X(68) + formyloxyX(40)
+    O=COC([Pt])C=O(167) + X(1) <=> ketene(T)X(68) + formyloxyX(40)
+    ketene(T)X(68) + O=CC([Pt])O[Pt](31) <=> O=CC([Pt])C([Pt])C=O(168) + OX(7)
+    ketene(T)X(68) + O=CC([Pt])O[Pt](31) <=> O=CC([Pt])C=O(162) + [Pt]OC=[Pt](20)
+    vinoxyX(87) + O=CC(=[Pt])O[Pt](94) <=> ketene(T)X(68) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])C(C=O)O[Pt](169) + X(1) <=> ketene(T)X(68) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])OC([Pt])C=O(170) + X(1) <=> ketene(T)X(68) + O=CC([Pt])O[Pt](31)
+    O=CC([Pt])C(=[Pt])O[Pt](157) <=> ketene(T)X(68) + [Pt]OC#[Pt](25)
+    ketene(T)X(68) + [Pt]OC#[Pt](25) <=> O=CC(=[Pt])O[Pt](94) + CHX(18)
+    ketene(T)X(68) + [Pt]OC#[Pt](25) <=> O=CC#[Pt](76) + [Pt]OC=[Pt](20)
+    O=CC([Pt])C#[Pt](132) + OX(7) <=> ketene(T)X(68) + [Pt]OC#[Pt](25)
+    O=CC([Pt])OC#[Pt](134) + X(1) <=> ketene(T)X(68) + [Pt]OC#[Pt](25)
+    O=CC([Pt])C([Pt])C=O(168) <=> ketene(T)X(68) + ketene(T)X(68)
+    O=CC([Pt])C=O(162) + CHX(18) <=> ketene(T)X(68) + ketene(T)X(68)
+    ketene(T)X(68) + ketene(T)X(68) <=> vinoxyX(87) + O=CC#[Pt](76)
+
+After model enlargement:
+    The model core has 41 species and 87 reactions
+    The model edge has 133 species and 235 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 87 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 87 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 322 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 322 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:02:19
+    Memory used: 345.51 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 4.4088e-29 s, species OCHCO(93) at rate ratio 8.38316022247e-44 was added to model core in model resurrection process
+
+
+Adding species OCHCO(93) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    OCHCO(93)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    OCHCO(93) + X(1) <=> OCHCOX(26)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 42 species and 88 reactions
+    The model edge has 132 species and 234 reactions
+
+
+Species with SMILES of O=C=CO[Pt] named OCHCOX based on thermo library name
+Generating kinetics for new reactions...
+
+Summary of Secondary Model Edge Enlargement
+---------------------------------
+Added 0 new core species
+Created 1 new edge species
+    OCHCOX(171)
+Added 0 new core reactions
+Created 1 new edge reactions
+    OCHCO(93) + X(1) <=> OCHCOX(171)
+
+After model enlargement:
+    The model core has 42 species and 88 reactions
+    The model edge has 133 species and 235 reactions
+
+
+Saving current model core to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 88 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 88 reactions.
+Saving current model core and edge to Chemkin file...
+Chemkin file contains 0 reactions.
+Chemkin file contains 323 reactions.
+Saving annotated version of Chemkin files...
+Chemkin file contains 0 reactions.
+Chemkin file contains 323 reactions.
+Saving current model core to HTML file...
+Saving current model edge to HTML file...
+Updating RMG execution statistics...
+    Execution time (DD:HH:MM:SS): 00:00:02:37
+    Memory used: 345.73 MB
+
+Conducting simulation of reaction system 1...
+Error: Trying to step from time 0.0 to 1e-12 resulted in a solver (DASPK) error
+Resurrecting Model...
+At time 4.4622e-29 s, species [Pt]C=[Pt](28) at rate ratio 2.43213283519e-44 was added to model core in model resurrection process
+
+
+Adding species [Pt]C=[Pt](28) to model core
+
+Summary of Model Enlargement
+---------------------------------
+Added 1 new core species
+    [Pt]C=[Pt](28)
+Created 0 new edge species
+Moved 1 reactions from edge to core
+    [Pt]OC=[Pt](20) + X(1) <=> OX(7) + [Pt]C=[Pt](28)
+Added 0 new core reactions
+Created 0 new edge reactions
+
+After model enlargement:
+    The model core has 43 species and 89 reactions
+    The model edge has 132 species and 234 reactions
+
+
+Error: Couldn't find in radical thermo database:
+Error: <Molecule "[C]">
+Error: multiplicity 5
+1 C u4 p0 c0
+

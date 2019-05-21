@@ -1,0 +1,30 @@
+! Species         Shape    LJ-depth  LJ-diam   DiplMom   Polzblty  RotRelaxNum Data     
+! Name            Index    epsilon/k_B sigma     mu        alpha     Zrot      Source   
+N2                  1      97.530     3.621     0.000     1.760     4.000    ! PrimaryTransportLibrary
+Ar                  0     136.501     3.330     0.000     0.000     0.000    ! GRI-Mech
+He                  0      10.200     2.576     0.000     0.000     0.000    ! NOx2018
+Ne                  0     148.600     3.758     0.000     0.000     0.000    ! Epsilon & sigma estimated with fixed Lennard Jones Parameters. This is the fallback method! Try improving transport databases!
+! X(1)                None
+! HCO_ads(2)          None
+CH4(3)              2     141.400     3.746     0.000     2.600    13.000    ! GRI-Mech
+O2(4)               1     106.700     3.467     0.000     0.000     0.000    ! PrimaryTransportLibrary
+! CHOX2(20)           None
+! CH4X(21)            None
+! OX(7)               None
+! OCX(15)             None
+! HOX(9)              None
+! HX(6)               None
+CH2O2(34)           2     481.800     3.626     1.700     0.000     1.000    ! NOx2018
+! H2OX(10)            None
+H2O(11)             2     809.102     2.641     0.000     1.760     4.000    ! PrimaryTransportLibrary
+H2(5)               1      59.700     2.833     0.000     0.000     0.000    ! PrimaryTransportLibrary
+CO(14)              1      91.700     3.690     0.000     1.760     4.000    ! PrimaryTransportLibrary
+! H2X(41)             None
+! CO2X(13)            None
+CO2(12)             1     195.201     3.941     0.000     0.000     0.000    ! PrimaryTransportLibrary
+! CH2O2X(40)          None
+! COX(42)             None
+! CH3X(8)             None
+! CH2X(17)            None
+! CHX(18)             None
+! CX(16)              None
